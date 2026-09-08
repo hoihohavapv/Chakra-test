@@ -67,7 +67,7 @@
       border-radius: 14px;
       padding: 18px;
       text-align: center;
-      margin: 16px 0 18px;
+      margin: 16px 0 10px;
     }
     .otp-label { font-size: 13px; color: #1e293b; font-weight: 600; }
     .otp-code {
@@ -83,10 +83,17 @@
       border: 1px solid #dce2ec;
       margin-top: 6px;
     }
+    .decline-note {
+      font-size: 12px;
+      color: #8a94a6;
+      text-align: center;
+      margin: 6px 0 14px;
+      font-style: italic;
+    }
     .button-group {
       display: flex;
       gap: 12px;
-      margin: 18px 0 10px;
+      margin: 10px 0 10px;
     }
     .btn-confirm {
       flex: 1;
@@ -162,6 +169,11 @@
       <div class="otp-label">🔐 Your Shiprocket Delivery OTP</div>
       <div class="otp-code">4862</div>
       <p style="font-size:12px; color:#5a6f88; margin-top:6px;">Share OTP with delivery partner</p>
+    </div>
+
+    <!-- ===== DECLINE NOTE ADDED HERE ===== -->
+    <div class="decline-note">
+      If this is not your order, please decline it.
     </div>
 
     <div class="button-group">
